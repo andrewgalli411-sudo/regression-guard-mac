@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>regression.guard</title>
+<style>
+  :root {
+    --bg: #0a0e1a; --surface: #0f1424; --border: #1f2940;
+    --text: #e8eaf0; --muted: #8a96b0; --dim: #6f7c98;
+    --brand: #6ff58a; --warn: #f5c56f; --bad: #f5706f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg); color: var(--text);
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 13px; height: 100vh; overflow: hidden;
+    -webkit-user-select: none; user-select: none;
+  }
+  body { display: flex; flex-direction: column; padding: 16px; }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .brand { color: var(--brand); font-size: 12px; }
+  .close { color: var(--dim); cursor: pointer; font-size: 16px; padding: 0 4px; }
+  .close:hover { color: var(--text); }
+  .score-card {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px;
+  }
+  .score-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+  .score-value { font-size: 32px; font-weight: 500; }
+  .score-value.good { color: var(--brand); }
+  .score-value.mid  { color: var(--warn); }
+  .score-value.bad  { color: var(--bad); }
+  .section-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .issues {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 12px; margin-bottom: 12px; max-height: 240px; overflow-y: auto;
+  }
+  .issue { margin-bottom: 8px; line-height: 1.5; font-size: 12px; }
+  .issue:last-child { margin-bottom: 0; }
+  .sev { display: inline-block; padding: 1px 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 6px; }
+  .sev.high   { background: rgba(245,112,111,.15); color: var(--bad); }
+  .sev.medium { background: rgba(245,197,111,.15); color: var(--warn); }
+  .sev.low    { background: rgba(138,150,176,.15); color: var(--muted); }
+  .actions { display: flex; gap: 8px; margin-top: auto; }
+  button {
+    flex: 1; background: transparent; border: 1px solid var(--border);
+    color: var(--text); padding: 10px; font-family: inherit; font-size: 12px; cursor: pointer;
+  }
+  button.primary { background: var(--brand); color: var(--bg); border-color: var(--brand); font-weight: 500; }
+  button:hover { border-color: var(--muted); }
+  button.primary:hover { opacity: .9; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .loading { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .error {
+    background: rgba(245,112,111,.08); border: 1px solid var(--bad);
+    color: var(--bad); padding: 16px; font-size: 12px; line-height: 1.5;
+  }
+  .error a { color: var(--brand); text-decoration: none; }
+  .rewrite-result {
+    background: var(--surface); border: 1px solid var(--brand);
+    padding: 12px; margin-bottom: 12px; max-height: 280px; overflow-y: auto;
+    font-size: 12px; line-height: 1.5;
+    -webkit-user-select: text; user-select: text;
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <span class="brand">[·] regression.guard</span>
+    <span class="close" id="close" aria-label="Close">×</span>
+  </div>
+  <div id="content"></div>
+  <script src="./result-renderer.js"></script>
+</body>
+</html>

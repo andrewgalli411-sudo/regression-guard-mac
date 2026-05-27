@@ -1,32 +1,86 @@
-import { app } from "electron";
+import { app, ipcMain } from "electron";
 import { createTray } from "./tray";
 import { registerHotkey, unregisterAll } from "./hotkey";
+import { showResultWindow, getResultWindow } from "./windows/result";
+import { analyzePrompt, rewritePrompt, type ApiError } from "./api";
+import { getApiKey } from "./storage";
+
+let trayRef: Electron.Tray | null = null;
 
 app.whenReady().then(() => {
-  // Hide dock icon — this is a menu bar app, not a windowed app
   app.dock?.hide();
+  trayRef = createTray();
 
-  createTray();
+  registerHotkey(async (text: string) => {
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      showResultWindow(trayRef, {
+        state: "error",
+        message: "No API key set. Settings window arrives in Phase 3.",
+      });
+      return;
+    }
 
-  registerHotkey((text: string) => {
-    console.log("[main] Captured selection:");
-    console.log("---");
-    console.log(text);
-    console.log("---");
-    console.log(`[main] Length: ${text.length} chars`);
-    // Phase 2 will hand this off to the API client + result window
+    showResultWindow(trayRef, { state: "loading", text });
+
+    try {
+      const result = await analyzePrompt(apiKey, text);
+      showResultWindow(trayRef, {
+        state: "success",
+        text,
+        score: result.overall_score,
+        issues: result.quality?.issues ?? [],
+      });
+    } catch (err) {
+      const apiErr = err as ApiError;
+      showResultWindow(trayRef, {
+        state: "error",
+        message: errorMessage(apiErr),
+        upgrade_url:
+          apiErr.type === "quota_exceeded" ? apiErr.upgrade_url : undefined,
+      });
+    }
   });
 
-  console.log(
-    "[main] regression.guard ready. Hotkey active. Tray icon should be in menu bar."
-  );
+  ipcMain.handle("rewrite", async (_event, text: string, issues: unknown[]) => {
+    const apiKey = getApiKey();
+    if (!apiKey) return { error: "No API key set." };
+    try {
+      const result = await rewritePrompt(
+        apiKey,
+        text,
+        issues as never
+      );
+      return {
+        rewritten_template: result.rewritten_template,
+        reasoning: result.reasoning,
+      };
+    } catch (err) {
+      return { error: errorMessage(err as ApiError) };
+    }
+  });
+
+  ipcMain.on("close-result-window", () => getResultWindow()?.hide());
+
+  console.log("[main] regression.guard ready. Press ⌘⇧R to analyze.");
 });
 
-app.on("will-quit", () => {
-  unregisterAll();
-});
+function errorMessage(err: ApiError): string {
+  switch (err.type) {
+    case "unauthorized":
+      return "Invalid API key. Update it in settings.";
+    case "quota_exceeded":
+      return "Monthly quota exceeded. Upgrade for more.";
+    case "rate_limited":
+      return "Too many requests — try again in a minute.";
+    case "network":
+      return "Network error. Check your connection.";
+    case "server":
+      return `Server error (HTTP ${err.status}).`;
+  }
+}
 
-// Prevent app from quitting when all windows close (we have no windows yet)
+app.on("will-quit", () => unregisterAll());
 app.on("window-all-closed", () => {
-  // intentionally empty — app lives in the menu bar, not windows
+  /* menu bar app — no windows to close */
 });

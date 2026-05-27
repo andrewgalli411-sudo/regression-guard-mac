@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/main.js",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc && electron .",
+    "build": "tsc && node -e \"const fs=require('fs');fs.mkdirSync('dist/windows',{recursive:true});fs.copyFileSync('src/windows/result.html','dist/windows/result.html');\"",
+    "dev": "npm run build && electron .",
     "watch": "tsc -w"
   },
   "keywords": [],
