@@ -9,6 +9,8 @@ jobs:
   release:
     runs-on: macos-14
     timeout-minutes: 30
+    permissions:
+      contents: write  # required to create releases and upload assets
 
     steps:
       - name: Checkout
