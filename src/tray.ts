@@ -1,6 +1,7 @@
-import { Tray, Menu, nativeImage } from "electron";
+import { Tray, Menu, nativeImage, shell } from "electron";
 import path from "path";
 import { getHotkey } from "./storage";
+import { createSettingsWindow } from "./windows/settings";
 
 let tray: Tray | null = null;
 
@@ -23,14 +24,34 @@ export function createTray(): Tray {
 
 export function rebuildMenu(): void {
   if (!tray) return;
-  const hotkey = getHotkey().replace(/CommandOrControl/g, "⌘");
+  const hotkey = formatHotkey(getHotkey());
+
   const menu = Menu.buildFromTemplate([
     { label: `Analyze selection  (${hotkey})`, enabled: false },
     { type: "separator" },
-    { label: "Settings…", enabled: false }, // Phase 3
-    { label: "About regression.guard", enabled: false }, // Phase 3
+    {
+      label: "Settings…",
+      accelerator: "CommandOrControl+,",
+      click: () => createSettingsWindow(),
+    },
+    {
+      label: "About regression.guard",
+      click: () =>
+        shell.openExternal("https://prompt-regression-guard.vercel.app"),
+    },
     { type: "separator" },
     { label: "Quit", role: "quit" },
   ]);
+
   tray.setContextMenu(menu);
+}
+
+function formatHotkey(accelerator: string): string {
+  return accelerator
+    .replace(/CommandOrControl/g, "⌘")
+    .replace(/Command/g, "⌘")
+    .replace(/Control/g, "⌃")
+    .replace(/Option|Alt/g, "⌥")
+    .replace(/Shift/g, "⇧")
+    .replace(/\+/g, " ");
 }

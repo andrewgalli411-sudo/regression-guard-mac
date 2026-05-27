@@ -1,3 +1,4 @@
+export {};
 const content = document.getElementById("content")!;
 const closeBtn = document.getElementById("close")!;
 

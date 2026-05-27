@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Welcome to regression.guard</title>
+<style>
+  :root {
+    --bg: #0a0e1a; --surface: #0f1424; --border: #1f2940;
+    --text: #e8eaf0; --muted: #8a96b0; --dim: #6f7c98;
+    --brand: #6ff58a; --bad: #f5706f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg); color: var(--text);
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 13px; height: 100vh; overflow: hidden;
+  }
+  body { display: flex; flex-direction: column; padding: 32px; }
+  .brand { color: var(--brand); font-size: 12px; margin-bottom: 24px; }
+  .step { display: none; flex-direction: column; flex: 1; }
+  .step.active { display: flex; }
+  h1 { font-size: 22px; font-weight: 500; margin-bottom: 12px; }
+  h2 { font-size: 16px; font-weight: 500; margin-bottom: 8px; color: var(--text); }
+  p { color: var(--muted); line-height: 1.6; margin-bottom: 16px; font-size: 13px; }
+  input[type="text"], input[type="password"] {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); padding: 12px 14px; font-family: inherit; font-size: 13px; outline: none;
+  }
+  input:focus { border-color: var(--brand); }
+  label { display: block; margin-bottom: 8px; font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; }
+  .actions { display: flex; gap: 8px; margin-top: auto; padding-top: 24px; }
+  button {
+    flex: 1; background: transparent; border: 1px solid var(--border);
+    color: var(--text); padding: 12px; font-family: inherit; font-size: 13px; cursor: pointer;
+  }
+  button.primary { background: var(--brand); color: var(--bg); border-color: var(--brand); font-weight: 500; }
+  button:hover { border-color: var(--muted); }
+  button.primary:hover { opacity: 0.9; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .progress { display: flex; gap: 6px; margin-bottom: 24px; }
+  .dot { width: 24px; height: 4px; background: var(--border); }
+  .dot.active { background: var(--brand); }
+  .error { color: var(--bad); font-size: 12px; margin-top: 8px; }
+  .ok { color: var(--brand); font-size: 12px; margin-top: 8px; }
+  .link { color: var(--brand); text-decoration: none; cursor: pointer; }
+  .link:hover { text-decoration: underline; }
+  .hotkey-display {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 16px; text-align: center; font-size: 18px; margin: 16px 0; color: var(--brand);
+  }
+</style>
+</head>
+<body>
+  <div class="brand">[·] regression.guard</div>
+  <div class="progress">
+    <div class="dot active" id="dot-0"></div>
+    <div class="dot" id="dot-1"></div>
+    <div class="dot" id="dot-2"></div>
+  </div>
+
+  <!-- Step 1: Welcome -->
+  <div class="step active" data-step="0">
+    <h1>Highlight any prompt, get an instant fix</h1>
+    <p>regression.guard scores LLM prompts wherever you write them — your editor, your browser, your terminal, your notes. Select text anywhere on your Mac, hit a hotkey, get a quality score and a rewrite suggestion in 5 seconds.</p>
+    <p>This 60-second setup gets you running.</p>
+    <div class="actions">
+      <button class="primary" id="start">Get started</button>
+    </div>
+  </div>
+
+  <!-- Step 2: API Key -->
+  <div class="step" data-step="1">
+    <h2>Paste your API key</h2>
+    <p>Get one (free, 50 analyses/month) at <span class="link" id="open-dashboard">regression.guard/dashboard</span>. Already have an account? Sign in and grab a key from the API tab.</p>
+    <label>API key</label>
+    <input type="password" id="api-key" placeholder="rg_..." spellcheck="false" autocomplete="off" />
+    <div id="key-status"></div>
+    <div class="actions">
+      <button id="back-1">Back</button>
+      <button class="primary" id="save-key" disabled>Save key</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Hotkey confirmation -->
+  <div class="step" data-step="2">
+    <h2>Your hotkey</h2>
+    <p>Press this combination anywhere on your Mac after selecting text to analyze it. You can change it later in Settings.</p>
+    <div class="hotkey-display" id="hotkey-display">⌘ ⇧ R</div>
+    <p style="font-size: 12px;">macOS will ask for Accessibility permission so the hotkey can read your selected text. Grant it when prompted — without it, the hotkey won't work.</p>
+    <div class="actions">
+      <button id="back-2">Back</button>
+      <button class="primary" id="finish">Start using regression.guard</button>
+    </div>
+  </div>
+
+  <script src="./onboarding-renderer.js"></script>
+</body>
+</html>

@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/main.js",
   "scripts": {
-    "build": "tsc && node -e \"const fs=require('fs');fs.mkdirSync('dist/windows',{recursive:true});fs.copyFileSync('src/windows/result.html','dist/windows/result.html');\"",
+    "build": "tsc && node -e \"const fs=require('fs');const d='dist/windows';fs.mkdirSync(d,{recursive:true});['result','onboarding','settings'].forEach(f=>fs.copyFileSync('src/windows/'+f+'.html',d+'/'+f+'.html'));\"",
     "dev": "npm run build && electron .",
     "watch": "tsc -w"
   },

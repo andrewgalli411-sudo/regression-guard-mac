@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Settings</title>
+<style>
+  :root {
+    --bg: #0a0e1a; --surface: #0f1424; --border: #1f2940;
+    --text: #e8eaf0; --muted: #8a96b0; --dim: #6f7c98;
+    --brand: #6ff58a; --bad: #f5706f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg); color: var(--text);
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 13px; height: 100vh; overflow-y: auto;
+  }
+  body { padding: 28px 32px; }
+  h1 { font-size: 18px; font-weight: 500; margin-bottom: 24px; }
+  .section { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .section:last-child { border-bottom: 0; }
+  .section-title { font-size: 11px; color: var(--brand); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  label { display: block; margin-bottom: 6px; font-size: 12px; color: var(--dim); }
+  input[type="text"], input[type="password"] {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 12px; font-family: inherit; font-size: 13px; outline: none;
+  }
+  input:focus { border-color: var(--brand); }
+  .row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .row input { flex: 1; }
+  button {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text); padding: 10px 16px; font-family: inherit; font-size: 12px; cursor: pointer;
+  }
+  button.primary { background: var(--brand); color: var(--bg); border-color: var(--brand); font-weight: 500; }
+  button:hover { border-color: var(--muted); }
+  button.primary:hover { opacity: 0.9; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .helper { color: var(--dim); font-size: 11px; margin-top: 6px; line-height: 1.5; }
+  .checkbox-row { display: flex; align-items: center; gap: 10px; }
+  .checkbox-row input { width: auto; }
+  .status { font-size: 12px; margin-top: 8px; }
+  .status.ok { color: var(--brand); }
+  .status.error { color: var(--bad); }
+  .hotkey-display {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 12px; text-align: center; font-size: 16px; color: var(--brand);
+  }
+  .hotkey-display.recording { color: var(--bad); border-color: var(--bad); }
+  .link { color: var(--brand); text-decoration: none; cursor: pointer; font-size: 12px; }
+  .link:hover { text-decoration: underline; }
+  .about { color: var(--dim); font-size: 12px; line-height: 1.7; }
+</style>
+</head>
+<body>
+  <h1>Settings</h1>
+
+  <div class="section">
+    <div class="section-title">API Key</div>
+    <label>Your regression.guard API key</label>
+    <div class="row">
+      <input type="password" id="api-key" placeholder="rg_..." spellcheck="false" autocomplete="off" />
+      <button id="save-key">Save</button>
+    </div>
+    <div class="status" id="key-status"></div>
+    <div class="helper">Get a key at <span class="link" id="open-dashboard">regression.guard/dashboard</span>. Stored encrypted via macOS Keychain.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Hotkey</div>
+    <label>Global shortcut to analyze selected text</label>
+    <div class="hotkey-display" id="hotkey-display">⌘ ⇧ R</div>
+    <div class="row" style="margin-top: 10px;">
+      <button id="record-hotkey">Change hotkey</button>
+      <button id="reset-hotkey">Reset to default</button>
+    </div>
+    <div class="status" id="hotkey-status"></div>
+    <div class="helper">Click "Change hotkey" then press your desired combination. Must include Cmd, Option, or Control.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Startup</div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="open-at-login" />
+      <label for="open-at-login" style="margin: 0;">Open at login</label>
+    </div>
+    <div class="helper" style="margin-top: 10px;">Automatically start regression.guard when you log into your Mac.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">About</div>
+    <div class="about">
+      <div>regression.guard for macOS <span id="version">v0.1.0</span></div>
+      <div style="margin-top: 6px;">
+        <span class="link" id="open-site">regression.guard</span> ·
+        <span class="link" id="open-docs">Docs</span> ·
+        <span class="link" id="open-pricing">Pricing</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="./settings-renderer.js"></script>
+</body>
+</html>
