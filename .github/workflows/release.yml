@@ -27,16 +27,18 @@ jobs:
         run: npm run build
 
       - name: Build, sign, notarize, publish DMG
-        run: npm run release
+        # Only set CSC_LINK when the secret is actually present — passing an empty
+        # string causes electron-builder to crash trying to load it as a cert file.
+        run: |
+          if [ -n "$CSC_LINK_RAW" ]; then
+            export CSC_LINK="$CSC_LINK_RAW"
+            export CSC_KEY_PASSWORD="$CSC_KEY_PASSWORD_RAW"
+          fi
+          npm run release
         env:
-          # GitHub publish token
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-
-          # Code-signing (optional — if missing, electron-builder ships unsigned)
-          CSC_LINK: ${{ secrets.MAC_CERT_P12_BASE64 }}
-          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_P12_PASSWORD }}
-
-          # Notarization (optional — only runs if APPLE_ID is set)
+          CSC_LINK_RAW: ${{ secrets.MAC_CERT_P12_BASE64 }}
+          CSC_KEY_PASSWORD_RAW: ${{ secrets.MAC_CERT_P12_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
