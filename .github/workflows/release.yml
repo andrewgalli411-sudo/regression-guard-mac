@@ -36,7 +36,8 @@ jobs:
           fi
           npm run release
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          # Fall back to the auto-provided GITHUB_TOKEN if GH_TOKEN secret is not set
+          GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
           CSC_LINK_RAW: ${{ secrets.MAC_CERT_P12_BASE64 }}
           CSC_KEY_PASSWORD_RAW: ${{ secrets.MAC_CERT_P12_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
