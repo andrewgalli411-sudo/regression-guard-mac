@@ -1,23 +1,35 @@
 {
   "name": "regression-guard-mac",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Highlight any prompt on your Mac, get an instant quality score and rewrite.",
+  "author": {
+    "name": "Andrew Galli",
+    "email": "hello@regression.guard"
+  },
+  "homepage": "https://prompt-regression-guard.vercel.app",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc && node -e \"const fs=require('fs');const d='dist/windows';fs.mkdirSync(d,{recursive:true});['result','onboarding','settings'].forEach(f=>fs.copyFileSync('src/windows/'+f+'.html',d+'/'+f+'.html'));\"",
     "dev": "npm run build && electron .",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "dist": "npm run build && electron-builder --mac",
+    "dist:unsigned": "npm run build && electron-builder --mac -c.mac.identity=null",
+    "release": "npm run build && electron-builder --mac --publish always"
+  },
+  "build": {
+    "extends": "./electron-builder.yml"
   },
   "keywords": [],
-  "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
     "@types/node": "^25.9.1",
     "electron": "^33.4.11",
+    "electron-builder": "^26.8.1",
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "electron-store": "^8.2.0"
+    "electron-store": "^8.2.0",
+    "electron-updater": "^6.8.3"
   }
 }

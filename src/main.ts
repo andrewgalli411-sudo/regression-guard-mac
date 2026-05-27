@@ -1,4 +1,5 @@
 import { app, ipcMain, BrowserWindow } from "electron";
+import { initUpdater } from "./updater";
 import { createTray, rebuildMenu } from "./tray";
 import { registerHotkey, unregisterAll } from "./hotkey";
 import { showResultWindow, getResultWindow } from "./windows/result";
@@ -39,6 +40,9 @@ function analyzeCallback(text: string): void {
 app.whenReady().then(() => {
   app.dock?.hide();
   trayRef = createTray();
+
+  // No-op in dev; checks GitHub Releases every 4h in production
+  initUpdater();
 
   // First-run: no API key → show onboarding
   if (!getApiKey()) {

@@ -1,0 +1,58 @@
+appId: guard.regression.mac
+productName: regression.guard
+copyright: Copyright © 2026 Andrew Galli
+
+directories:
+  output: build
+  buildResources: build-resources
+
+# dist/**/* already contains the copied HTML files (from the build script)
+files:
+  - dist/**/*
+  - src/assets/**/*
+  - package.json
+  - "!node_modules/**/*"
+  - "node_modules/electron-updater/**/*"
+  - "node_modules/electron-store/**/*"
+
+extraMetadata:
+  main: dist/main.js
+
+mac:
+  category: public.app-category.developer-tools
+  icon: build-resources/icon.icns
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build-resources/entitlements.mac.plist
+  entitlementsInherit: build-resources/entitlements.mac.plist
+  notarize: true
+  extendInfo:
+    LSUIElement: true
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+    - target: zip
+      arch:
+        - x64
+        - arm64
+
+dmg:
+  title: "regression.guard"
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+  window:
+    width: 540
+    height: 380
+
+publish:
+  - provider: github
+    owner: andrewgalli411-sudo
+    repo: regression-guard-mac
+    releaseType: release
