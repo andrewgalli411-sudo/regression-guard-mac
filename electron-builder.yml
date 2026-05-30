@@ -14,6 +14,7 @@ files:
   - "!node_modules/**/*"
   - "node_modules/electron-updater/**/*"
   - "node_modules/electron-store/**/*"
+  - "node_modules/fs-extra/**/*"
 
 extraMetadata:
   main: dist/main.js
