@@ -6,15 +6,12 @@ directories:
   output: build
   buildResources: build-resources
 
-# dist/**/* already contains the copied HTML files (from the build script)
+# electron-builder bundles all production dependencies automatically.
+# Do not use a node_modules whitelist — partial lists silently break transitive deps.
 files:
   - dist/**/*
   - src/assets/**/*
   - package.json
-  - "!node_modules/**/*"
-  - "node_modules/electron-updater/**/*"
-  - "node_modules/electron-store/**/*"
-  - "node_modules/fs-extra/**/*"
 
 asarUnpack:
   - "src/assets/**/*"

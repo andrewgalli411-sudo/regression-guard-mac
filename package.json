@@ -1,6 +1,6 @@
 {
   "name": "regression-guard-mac",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Highlight any prompt on your Mac, get an instant quality score and rewrite.",
   "author": {
     "name": "Andrew Galli",

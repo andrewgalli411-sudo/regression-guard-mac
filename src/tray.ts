@@ -1,11 +1,28 @@
-import { Tray, Menu, nativeImage, shell } from "electron";
+import { Tray, Menu, nativeImage, shell, app } from "electron";
 import path from "path";
+import { execSync } from "child_process";
 import { getHotkey } from "./storage";
 import { createSettingsWindow } from "./windows/settings";
 
 let tray: Tray | null = null;
 
 export function createTray(): Tray {
+  // macOS stores NSStatusItem preferred positions in com.apple.controlcenter,
+  // keyed by the app bundle ID. Writing a large x-coordinate here before
+  // creating the Tray pushes the icon to the right side of the menu bar,
+  // preventing it from being hidden under the MacBook Pro notch.
+  try {
+    const plistPath = path.join(app.getAppPath(), "..", "..", "Info.plist");
+    const bundleId = execSync(
+      `defaults read "${plistPath}" CFBundleIdentifier`
+    ).toString().trim();
+    execSync(
+      `defaults write com.apple.controlcenter ` +
+      `"NSStatusItem Preferred Position ${bundleId}" -float 99999`
+    );
+  } catch {
+    // Non-fatal: icon may still appear under notch on very crowded menu bars
+  }
   // nativeImage.createFromPath uses native OS loaders that cannot read inside
   // an .asar archive. Explicitly resolve to the unpacked path in production.
   const iconPath = path.join(
