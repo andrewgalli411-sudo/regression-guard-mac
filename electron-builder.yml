@@ -16,6 +16,9 @@ files:
   - "node_modules/electron-store/**/*"
   - "node_modules/fs-extra/**/*"
 
+asarUnpack:
+  - "src/assets/**/*"
+
 extraMetadata:
   main: dist/main.js
 

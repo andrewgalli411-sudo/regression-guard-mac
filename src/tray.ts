@@ -6,8 +6,10 @@ import { createSettingsWindow } from "./windows/settings";
 let tray: Tray | null = null;
 
 export function createTray(): Tray {
+  // nativeImage.createFromPath uses native OS loaders that cannot read inside
+  // an .asar archive. Explicitly resolve to the unpacked path in production.
   const iconPath = path.join(
-    __dirname,
+    __dirname.replace("app.asar", "app.asar.unpacked"),
     "..",
     "src",
     "assets",
