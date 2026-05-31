@@ -18,7 +18,7 @@ export function createTray(): Tray {
     ).toString().trim();
     execSync(
       `defaults write com.apple.controlcenter ` +
-      `"NSStatusItem Preferred Position ${bundleId}" -float 5`
+      `"NSStatusItem Preferred Position ${bundleId}" -float 600`
     );
   } catch {
     // Non-fatal: icon may still appear under notch on very crowded menu bars
