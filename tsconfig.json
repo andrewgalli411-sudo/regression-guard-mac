@@ -10,5 +10,10 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": [
+    "src/windows/onboarding-renderer.ts",
+    "src/windows/result-renderer.ts",
+    "src/windows/settings-renderer.ts"
+  ]
 }

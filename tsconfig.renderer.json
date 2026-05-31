@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext"
+  },
+  "include": [
+    "src/renderer.d.ts",
+    "src/windows/onboarding-renderer.ts",
+    "src/windows/result-renderer.ts",
+    "src/windows/settings-renderer.ts"
+  ],
+  "exclude": []
+}

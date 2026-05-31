@@ -1,6 +1,6 @@
 {
   "name": "regression-guard-mac",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "description": "Highlight any prompt on your Mac, get an instant quality score and rewrite.",
   "author": {
     "name": "Andrew Galli",
@@ -9,7 +9,7 @@
   "homepage": "https://prompt-regression-guard.vercel.app",
   "main": "dist/main.js",
   "scripts": {
-    "build": "tsc && node -e \"const fs=require('fs');const d='dist/windows';fs.mkdirSync(d,{recursive:true});['result','onboarding','settings'].forEach(f=>fs.copyFileSync('src/windows/'+f+'.html',d+'/'+f+'.html'));\"",
+    "build": "tsc && tsc -p tsconfig.renderer.json && node -e \"const fs=require('fs');const d='dist/windows';fs.mkdirSync(d,{recursive:true});['result','onboarding','settings'].forEach(f=>fs.copyFileSync('src/windows/'+f+'.html',d+'/'+f+'.html'));\"",
     "dev": "npm run build && electron .",
     "watch": "tsc -w",
     "dist": "npm run build && electron-builder --mac",

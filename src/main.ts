@@ -1,4 +1,4 @@
-import { app, ipcMain, BrowserWindow } from "electron";
+import { app, ipcMain, BrowserWindow, Menu } from "electron";
 import { initUpdater } from "./updater";
 import { createTray, rebuildMenu } from "./tray";
 import { registerHotkey, unregisterAll } from "./hotkey";
@@ -8,6 +8,31 @@ import { analyzePrompt, rewritePrompt, type ApiError } from "./api";
 import { getApiKey, setApiKey, getHotkey, setHotkey } from "./storage";
 
 let trayRef: Electron.Tray | null = null;
+
+function buildAppMenu() {
+  const template: Electron.MenuItemConstructorOptions[] = [
+    {
+      label: app.getName(),
+      submenu: [
+        { role: "about" }, { type: "separator" },
+        { role: "hide" }, { role: "hideOthers" }, { role: "unhide" },
+        { type: "separator" }, { role: "quit" }
+      ]
+    },
+    {
+      label: "Edit",
+      submenu: [
+        { role: "undo" }, { role: "redo" }, { type: "separator" },
+        { role: "cut" }, { role: "copy" }, { role: "paste" }, { role: "selectAll" }
+      ]
+    },
+    {
+      label: "Window",
+      submenu: [{ role: "minimize" }, { role: "close" }]
+    }
+  ];
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
 
 // Hoisted so save-hotkey IPC can re-register with the real callback
 function analyzeCallback(text: string): void {
@@ -38,7 +63,19 @@ function analyzeCallback(text: string): void {
 }
 
 app.whenReady().then(() => {
-  app.dock?.hide();
+  buildAppMenu();
+
+  // Dock: visible while onboarding is pending so the user can re-open
+  // the window even if the tray icon is obscured by the notch.
+  if (!getApiKey()) {
+    app.dock?.show();
+    app.on("activate", () => {
+      if (!getApiKey()) createOnboardingWindow();
+    });
+  } else {
+    app.dock?.hide();
+  }
+
   trayRef = createTray();
 
   // No-op in dev; checks GitHub Releases every 4h in production
@@ -122,6 +159,7 @@ app.whenReady().then(() => {
 
   ipcMain.on("complete-onboarding", () => {
     getOnboardingWindow()?.close();
+    app.dock?.hide();
     rebuildMenu();
   });
 

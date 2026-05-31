@@ -10,15 +10,13 @@ export function registerHotkey(onCapture: (text: string) => void): boolean {
   if (registered === accelerator) return true;
   if (registered) globalShortcut.unregister(registered);
 
-  const success = globalShortcut.register(accelerator, async () => {
-    const text = await captureSelection();
+  const success = globalShortcut.register(accelerator, () => {
+    const text = captureSelection();
 
     if (!text) {
       new Notification({
         title: "regression.guard",
-        body:
-          "Select text first, then press " +
-          accelerator.replace(/CommandOrControl/g, "⌘"),
+        body: "Select text and press Cmd+C before the hotkey.",
       }).show();
       return;
     }

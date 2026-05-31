@@ -21,6 +21,7 @@ export function createResultWindow(): BrowserWindow {
     skipTaskbar: true,
     fullscreenable: false,
     movable: false,
+    acceptFirstMouse: true,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

@@ -18,6 +18,7 @@ export function createOnboardingWindow(): BrowserWindow {
     fullscreenable: false,
     minimizable: false,
     maximizable: false,
+    acceptFirstMouse: true,
     title: "Welcome to regression.guard",
     webPreferences: {
       contextIsolation: true,

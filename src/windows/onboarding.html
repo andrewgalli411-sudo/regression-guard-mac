@@ -84,15 +84,15 @@
   <!-- Step 3: Hotkey confirmation -->
   <div class="step" data-step="2">
     <h2>Your hotkey</h2>
-    <p>Press this combination anywhere on your Mac after selecting text to analyze it. You can change it later in Settings.</p>
+    <p>Select any text, press <strong>Cmd+C</strong> to copy it, then press this hotkey. The app reads directly from the clipboard — no extra permissions needed.</p>
     <div class="hotkey-display" id="hotkey-display">⌘ ⇧ R</div>
-    <p style="font-size: 12px;">macOS will ask for Accessibility permission so the hotkey can read your selected text. Grant it when prompted — without it, the hotkey won't work.</p>
+    <p style="font-size: 12px;">You can change the hotkey later in Settings.</p>
     <div class="actions">
       <button id="back-2">Back</button>
       <button class="primary" id="finish">Start using regression.guard</button>
     </div>
   </div>
 
-  <script src="./onboarding-renderer.js"></script>
+  <script type="module" src="./onboarding-renderer.js"></script>
 </body>
 </html>
