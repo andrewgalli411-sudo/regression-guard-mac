@@ -8,9 +8,9 @@ let tray: Tray | null = null;
 
 export function createTray(): Tray {
   // macOS stores NSStatusItem preferred positions in com.apple.controlcenter,
-  // keyed by the app bundle ID. Writing a large x-coordinate here before
-  // creating the Tray pushes the icon to the right side of the menu bar,
-  // preventing it from being hidden under the MacBook Pro notch.
+  // keyed by the app bundle ID. Values are measured from the RIGHT edge of the
+  // screen — smaller = further right. Writing 5 here places the icon just left
+  // of the clock, keeping it clear of the MacBook Pro notch dead zone.
   try {
     const plistPath = path.join(app.getAppPath(), "..", "..", "Info.plist");
     const bundleId = execSync(
@@ -18,7 +18,7 @@ export function createTray(): Tray {
     ).toString().trim();
     execSync(
       `defaults write com.apple.controlcenter ` +
-      `"NSStatusItem Preferred Position ${bundleId}" -float 99999`
+      `"NSStatusItem Preferred Position ${bundleId}" -float 5`
     );
   } catch {
     // Non-fatal: icon may still appear under notch on very crowded menu bars
