@@ -4,14 +4,6 @@ const closeBtn = document.getElementById("close")!;
 
 // ── Category metadata ─────────────────────────────────────────────────────────
 
-const CAT_COLOR: Record<string, string> = {
-  structure:   "#C8413A",
-  clarity:     "#2D9DA8",
-  context:     "#6B7A4B",
-  "model-fit": "#7B4FB5",
-  model_fit:   "#7B4FB5",
-  modelfit:    "#7B4FB5",
-};
 
 const CAT_LABEL: Record<string, string> = {
   structure:   "Structure",
@@ -22,11 +14,10 @@ const CAT_LABEL: Record<string, string> = {
   modelfit:    "Model-fit",
 };
 
-// Severity fallback when no category field
 const SEV_COLOR: Record<string, string> = {
-  high:   "#C8413A",
-  medium: "#E8985B",
-  low:    "#2D9DA8",
+  high:   "#DA3633",  // state-fail
+  medium: "#D29922",  // state-regress
+  low:    "#6E7681",  // state-skipped
 };
 const SEV_LABEL: Record<string, string> = {
   high:   "Structure",
@@ -35,8 +26,7 @@ const SEV_LABEL: Record<string, string> = {
 };
 
 function issueColor(issue: Issue): string {
-  const cat = (issue.category || "").toLowerCase();
-  return CAT_COLOR[cat] ?? SEV_COLOR[(issue.severity || "low").toLowerCase()] ?? "#E8985B";
+  return SEV_COLOR[(issue.severity || "low").toLowerCase()] ?? "#6E7681";
 }
 
 function issueLabel(issue: Issue): string {
@@ -78,9 +68,9 @@ let currentIssues: Issue[] = [];
 // ── Score ring ────────────────────────────────────────────────────────────────
 
 function scoreColor(s: number): string {
-  if (s <= 40) return "#f5706f";
-  if (s <= 70) return "#E8985B";
-  return "#6ff58a";
+  if (s <= 40) return "#DA3633";   // state-fail
+  if (s <= 70) return "#D29922";   // state-regress
+  return "#2EA043";                // brand-accent
 }
 
 function renderRing(score: number): string {

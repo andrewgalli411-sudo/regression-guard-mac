@@ -5,64 +5,129 @@
 <title>Welcome to regression.guard</title>
 <style>
   :root {
-    --bg: #0a0e1a;
-    --surface: #0f1424;
-    --border: #1f2940;
-    --text: #e8eaf0;
-    --muted: #8a96b0;
-    --dim: #6f7c98;
-    --brand: #6ff58a;
-    --bad: #f5706f;
+    /* Surfaces */
+    --bg: #0B0D0E;
+    --surface: #13161A;
+    --elevated: #1B1F24;
+
+    /* Borders */
+    --border: #2E343A;
+    --border-subtle: #262C33;
+    --border-strong: #6E7681;
+
+    /* Text */
+    --text: #E6EDF3;
+    --muted: #8B949E;
+    --dim: #6E7681;
+    --text-inverse: #0D1117;
+
+    /* Brand */
+    --brand-primary: #1F883D;
+    --brand-accent: #2EA043;
+    --brand-pressed: #166B33;
+
+    /* States */
+    --state-pass: #1F883D;
+    --state-fail: #DA3633;
+    --state-regress: #D29922;
+    --state-running: #1F6FEB;
+    --state-skipped: #8B949E;
+
+    /* Danger */
+    --danger: #DA3633;
+    --danger-subtle: #FFA198;
+
+    /* Fonts */
+    --font-chrome: "Geist Mono", ui-monospace, "SF Mono", monospace;
+    --font-body: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-user-content: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @font-face {
+    font-family: "Geist Mono";
+    src: url("./fonts/GeistMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Geist Mono";
+    src: url("./fonts/GeistMono-Medium.woff2") format("woff2");
+    font-weight: 500;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Inter";
+    src: url("./fonts/Inter-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Inter";
+    src: url("./fonts/Inter-Medium.woff2") format("woff2");
+    font-weight: 500;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "JetBrains Mono";
+    src: url("./fonts/JetBrainsMono-Regular.woff2") format("woff2");
+    font-weight: 400 500;
+    font-display: swap;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     background: var(--bg); color: var(--text);
-    font-family: system-ui, -apple-system, "Helvetica Neue", sans-serif;
+    font-family: var(--font-body);
     font-size: 13px; height: 100vh; overflow: hidden;
   }
   body { display: flex; flex-direction: column; padding: 32px 36px; }
-  .brand { color: var(--dim); font-size: 11px; letter-spacing: 0.03em; margin-bottom: 24px; }
+  .brand { display: flex; align-items: center; margin-bottom: 24px; }
   .step { display: none; flex-direction: column; flex: 1; }
   .step.active { display: flex; }
-  h1 { font-size: 22px; font-weight: 600; line-height: 1.3; margin-bottom: 12px; letter-spacing: -0.01em; }
-  h2 { font-size: 16px; font-weight: 600; line-height: 1.3; margin-bottom: 8px; color: var(--text); }
+  h1 { font-family: var(--font-chrome); font-size: 22px; font-weight: 600; line-height: 1.3; margin-bottom: 12px; letter-spacing: -0.01em; }
+  h2 { font-family: var(--font-chrome); font-size: 16px; font-weight: 600; line-height: 1.3; margin-bottom: 8px; color: var(--text); }
   p { color: var(--muted); line-height: 1.55; margin-bottom: 12px; font-size: 13px; }
   input[type="text"], input[type="password"] {
     width: 100%; background: var(--surface); border: 1px solid var(--border);
     color: var(--text); padding: 12px 14px;
-    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-user-content);
     font-size: 13px; outline: none; border-radius: 4px;
   }
-  input:focus { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(111,245,138,0.15); }
+  input:focus { border-color: var(--brand-accent); box-shadow: 0 0 0 3px rgba(46,160,67,0.4); }
   label { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
   .actions { display: flex; gap: 8px; margin-top: auto; padding-top: 24px; }
   button {
     flex: 1; background: transparent; border: 1px solid var(--border);
-    color: var(--text); padding: 10px 18px; font-family: inherit; font-size: 13px;
+    color: var(--text); padding: 10px 18px; font-family: var(--font-body); font-size: 13px;
     font-weight: 500; cursor: pointer; border-radius: 4px;
   }
-  button.primary { background: var(--brand); color: white; border-color: var(--brand); }
+  button.primary { background: var(--brand-primary); color: var(--text-inverse); border-color: var(--brand-primary); }
   button:hover { border-color: var(--muted); }
-  button.primary:hover { opacity: 0.9; }
+  button.primary:hover { background: var(--brand-pressed); border-color: var(--brand-pressed); }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
   .progress { display: flex; gap: 6px; margin-bottom: 24px; }
   .dot { width: 24px; height: 4px; background: var(--border); border-radius: 2px; }
-  .dot.active { background: var(--brand); }
-  .error { color: var(--bad); font-size: 12px; margin-top: 8px; }
-  .ok { color: #6B7A4B; font-size: 12px; margin-top: 8px; }
-  .link { color: var(--brand); text-decoration: none; cursor: pointer; }
+  .dot.active { background: var(--brand-accent); }
+  .error { color: var(--danger); font-size: 12px; margin-top: 8px; }
+  .ok { color: var(--state-pass); font-size: 12px; margin-top: 8px; }
+  .link { color: var(--brand-accent); text-decoration: none; cursor: pointer; }
   .link:hover { text-decoration: underline; }
   .hotkey-display {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 6px; padding: 16px; text-align: center;
     font-size: 20px; margin: 16px 0; color: var(--text);
-    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-user-content);
     font-weight: 600;
   }
 </style>
 </head>
 <body>
-  <div class="brand">regression.guard</div>
+  <div class="brand">
+    <svg viewBox="0 0 48 24" width="32" height="16" style="vertical-align: middle;">
+      <polyline points="10,4 4,4 4,20 10,20" fill="none" stroke="#2EA043" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="square"/>
+      <polyline points="38,4 44,4 44,20 38,20" fill="none" stroke="#2EA043" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="square"/>
+      <circle cx="24" cy="12" r="2.5" fill="#2EA043"/>
+    </svg>
+    <span style="margin-left: 8px; font-family: var(--font-chrome); font-size: 14px; font-weight: 500; color: var(--text); letter-spacing: -0.01em;">regression.guard</span>
+  </div>
   <div class="progress">
     <div class="dot active" id="dot-0"></div>
     <div class="dot" id="dot-1"></div>

@@ -5,26 +5,78 @@
 <title>regression.guard</title>
 <style>
   :root {
-    --bg: #0a0e1a;
-    --surface: #0f1424;
-    --border: #1f2940;
-    --text: #e8eaf0;
-    --muted: #8a96b0;
-    --dim: #6f7c98;
-    --brand: #6ff58a;
-    --cat-structure: #C8413A;
-    --cat-clarity: #2D9DA8;
-    --cat-context: #6B7A4B;
-    --cat-modelfit: #7B4FB5;
-    --score-low: #f5706f;
-    --score-mid: #E8985B;
-    --score-high: #6ff58a;
+    /* Surfaces */
+    --bg: #0B0D0E;
+    --surface: #13161A;
+    --elevated: #1B1F24;
+
+    /* Borders */
+    --border: #2E343A;
+    --border-subtle: #262C33;
+    --border-strong: #6E7681;
+
+    /* Text */
+    --text: #E6EDF3;
+    --muted: #8B949E;
+    --dim: #6E7681;
+    --text-inverse: #0D1117;
+
+    /* Brand */
+    --brand-primary: #1F883D;
+    --brand-accent: #2EA043;
+    --brand-pressed: #166B33;
+
+    /* States */
+    --state-pass: #1F883D;
+    --state-fail: #DA3633;
+    --state-regress: #D29922;
+    --state-running: #1F6FEB;
+    --state-skipped: #8B949E;
+
+    /* Danger */
+    --danger: #DA3633;
+    --danger-subtle: #FFA198;
+
+    /* Fonts */
+    --font-chrome: "Geist Mono", ui-monospace, "SF Mono", monospace;
+    --font-body: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-user-content: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @font-face {
+    font-family: "Geist Mono";
+    src: url("./fonts/GeistMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Geist Mono";
+    src: url("./fonts/GeistMono-Medium.woff2") format("woff2");
+    font-weight: 500;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Inter";
+    src: url("./fonts/Inter-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Inter";
+    src: url("./fonts/Inter-Medium.woff2") format("woff2");
+    font-weight: 500;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "JetBrains Mono";
+    src: url("./fonts/JetBrainsMono-Regular.woff2") format("woff2");
+    font-weight: 400 500;
+    font-display: swap;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     background: var(--bg);
     color: var(--text);
-    font-family: system-ui, -apple-system, "Helvetica Neue", sans-serif;
+    font-family: var(--font-body);
     font-size: 14px;
     height: 100vh;
     overflow: hidden;
@@ -40,7 +92,7 @@
     align-items: center;
     flex-shrink: 0;
   }
-  .brand { color: var(--dim); font-size: 11px; letter-spacing: 0.03em; }
+  .brand { display: flex; align-items: center; }
   .close {
     color: var(--dim); cursor: pointer; font-size: 20px;
     line-height: 1; padding: 0 2px;
@@ -76,7 +128,7 @@
     font-weight: 800;
     line-height: 1;
     letter-spacing: -0.02em;
-    font-family: system-ui, -apple-system, "Helvetica Neue", sans-serif;
+    font-family: var(--font-body);
     -webkit-user-select: text;
     user-select: text;
   }
@@ -102,6 +154,7 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--muted);
+    font-family: var(--font-chrome);
     flex-shrink: 0;
   }
 
@@ -130,11 +183,13 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    font-family: var(--font-chrome);
     margin-bottom: 4px;
   }
   .card-desc {
     font-size: 13px;
     color: var(--text);
+    font-family: var(--font-user-content);
     line-height: 1.5;
     word-wrap: break-word;
     overflow-wrap: anywhere;
@@ -156,7 +211,7 @@
     background: transparent;
     color: var(--text);
     padding: 10px 18px;
-    font-family: inherit;
+    font-family: var(--font-body);
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
@@ -164,12 +219,12 @@
     flex-shrink: 0;
   }
   button.primary {
-    background: var(--brand);
-    color: white;
-    border-color: var(--brand);
+    background: var(--brand-primary);
+    color: var(--text-inverse);
+    border-color: var(--brand-primary);
   }
   button:hover { border-color: var(--muted); }
-  button.primary:hover { opacity: 0.9; }
+  button.primary:hover { background: var(--brand-pressed); border-color: var(--brand-pressed); }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
   button.ghost {
     background: transparent;
@@ -200,7 +255,7 @@
     background: var(--surface);
     border-radius: 6px;
     padding: 12px;
-    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-user-content);
     font-size: 12px;
     line-height: 1.6;
     overflow-y: auto;
@@ -221,12 +276,12 @@
 
   /* ── Error ── */
   .error-card {
-    background: rgba(200,65,58,0.12);
-    border: 1px solid rgba(200,65,58,0.3);
+    background: rgba(218,54,51,0.12);
+    border: 1px solid rgba(218,54,51,0.3);
     border-radius: 6px;
     padding: 14px;
     font-size: 13px;
-    color: var(--cat-structure);
+    color: var(--danger);
     line-height: 1.5;
     flex-shrink: 0;
   }
@@ -247,26 +302,26 @@
   }
   .upgrade-btn {
     width: 100%;
-    background: var(--brand);
-    color: white;
+    background: var(--brand-primary);
+    color: var(--text-inverse);
     border: none;
     border-radius: 4px;
     padding: 10px;
-    font-family: inherit;
+    font-family: var(--font-body);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
   }
-  .upgrade-btn:hover { opacity: 0.9; }
+  .upgrade-btn:hover { background: var(--brand-pressed); }
 
   /* ── No issues ── */
   .no-issues {
-    background: rgba(111,245,138,0.08);
-    border: 1px solid rgba(111,245,138,0.2);
+    background: rgba(46,160,67,0.08);
+    border: 1px solid rgba(46,160,67,0.2);
     border-radius: 6px;
     padding: 14px;
     font-size: 13px;
-    color: var(--cat-context);
+    color: var(--brand-accent);
     line-height: 1.5;
     text-align: center;
     flex-shrink: 0;
@@ -282,7 +337,14 @@
 </head>
 <body>
   <div class="header">
-    <span class="brand">regression.guard</span>
+    <div class="brand">
+      <svg viewBox="0 0 48 24" width="32" height="16" style="vertical-align: middle;">
+        <polyline points="10,4 4,4 4,20 10,20" fill="none" stroke="#2EA043" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="square"/>
+        <polyline points="38,4 44,4 44,20 38,20" fill="none" stroke="#2EA043" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="square"/>
+        <circle cx="24" cy="12" r="2.5" fill="#2EA043"/>
+      </svg>
+      <span style="margin-left: 8px; font-family: var(--font-chrome); font-size: 14px; font-weight: 500; color: var(--text); letter-spacing: -0.01em;">regression.guard</span>
+    </div>
     <span class="close" id="close" aria-label="Close">×</span>
   </div>
   <div id="content" style="display:contents;"></div>
