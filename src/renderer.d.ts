@@ -9,6 +9,7 @@ declare global {
         | { error: string }
       >;
       copyToClipboard: (text: string) => void;
+      notify: (title: string, body: string) => void;
       closeWindow: () => void;
       onShowResult: (callback: (data: unknown) => void) => void;
       getSettings: () => Promise<{

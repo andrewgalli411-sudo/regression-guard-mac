@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld("api", {
   rewrite: (text: string, issues: unknown[]) =>
     ipcRenderer.invoke("rewrite", text, issues),
   copyToClipboard: (text: string) => clipboard.writeText(text),
+  notify: (title: string, body: string) => ipcRenderer.send("notify", title, body),
   closeWindow: () => ipcRenderer.send("close-window"),
   onShowResult: (callback: (data: unknown) => void) => {
     ipcRenderer.on("show-result", (_event, data) => callback(data));

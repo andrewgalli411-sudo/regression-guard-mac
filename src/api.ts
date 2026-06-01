@@ -3,6 +3,7 @@ const API_BASE = "https://prompt-regression-guard.vercel.app/api";
 export interface QualityIssue {
   severity: "high" | "medium" | "low" | string;
   description: string;
+  category?: "structure" | "clarity" | "context" | "model-fit" | string;
 }
 
 export interface AnalyzeResult {

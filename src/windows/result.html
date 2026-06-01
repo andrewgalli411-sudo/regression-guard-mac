@@ -5,71 +5,284 @@
 <title>regression.guard</title>
 <style>
   :root {
-    --bg: #0a0e1a; --surface: #0f1424; --border: #1f2940;
-    --text: #e8eaf0; --muted: #8a96b0; --dim: #6f7c98;
-    --brand: #6ff58a; --warn: #f5c56f; --bad: #f5706f;
+    --bg: #FAF8F4;
+    --surface: #F0EDE8;
+    --border: #E2DDD6;
+    --text: #1C1A1A;
+    --muted: #6B6560;
+    --dim: #A09890;
+    --brand: #E8985B;
+    --cat-structure: #C8413A;
+    --cat-clarity: #2D9DA8;
+    --cat-context: #6B7A4B;
+    --cat-modelfit: #7B4FB5;
+    --score-low: #C8413A;
+    --score-mid: #E8985B;
+    --score-high: #6B7A4B;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
-    background: var(--bg); color: var(--text);
-    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-    font-size: 13px; height: 100vh; overflow: hidden;
-    -webkit-user-select: none; user-select: none;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Helvetica Neue", sans-serif;
+    font-size: 14px;
+    height: 100vh;
+    overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
   }
-  body { display: flex; flex-direction: column; padding: 16px; }
-  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .brand { color: var(--brand); font-size: 12px; }
-  .close { color: var(--dim); cursor: pointer; font-size: 16px; padding: 0 4px; }
+  body { display: flex; flex-direction: column; padding: 14px 16px; gap: 10px; }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .brand { color: var(--dim); font-size: 11px; letter-spacing: 0.03em; }
+  .close {
+    color: var(--dim); cursor: pointer; font-size: 20px;
+    line-height: 1; padding: 0 2px;
+  }
   .close:hover { color: var(--text); }
-  .score-card {
-    background: var(--surface); border: 1px solid var(--border);
-    padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px;
+
+  /* ── Score header card ── */
+  .score-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
   }
-  .score-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
-  .score-value { font-size: 32px; font-weight: 500; }
-  .score-value.good { color: var(--brand); }
-  .score-value.mid  { color: var(--warn); }
-  .score-value.bad  { color: var(--bad); }
-  .section-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-  .issues {
-    background: var(--surface); border: 1px solid var(--border);
-    padding: 12px; margin-bottom: 12px; max-height: 240px; overflow-y: auto;
+  .score-ring-wrap {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
   }
-  .issue { margin-bottom: 8px; line-height: 1.5; font-size: 12px; }
-  .issue:last-child { margin-bottom: 0; }
-  .sev { display: inline-block; padding: 1px 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 6px; }
-  .sev.high   { background: rgba(245,112,111,.15); color: var(--bad); }
-  .sev.medium { background: rgba(245,197,111,.15); color: var(--warn); }
-  .sev.low    { background: rgba(138,150,176,.15); color: var(--muted); }
-  .actions { display: flex; gap: 8px; margin-top: auto; }
+  .score-ring-wrap svg { display: block; }
+  .score-number {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-family: system-ui, -apple-system, "Helvetica Neue", sans-serif;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  .score-meta { flex: 1; min-width: 0; }
+  .score-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .score-summary {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  /* ── Issue cards ── */
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 150ms;
+  }
+  .card:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .card.open { box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
+  .card-body { padding: 10px 12px; }
+  .card-cat {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .card-expanded {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+  .card.open .card-expanded { display: block; }
+  .card-actions {
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+  }
+
+  /* ── Buttons ── */
   button {
-    flex: 1; background: transparent; border: 1px solid var(--border);
-    color: var(--text); padding: 10px; font-family: inherit; font-size: 12px; cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    padding: 7px 14px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 4px;
+    flex-shrink: 0;
   }
-  button.primary { background: var(--brand); color: var(--bg); border-color: var(--brand); font-weight: 500; }
+  button.primary {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+  }
   button:hover { border-color: var(--muted); }
-  button.primary:hover { opacity: .9; }
-  button:disabled { opacity: .5; cursor: not-allowed; }
-  .loading { text-align: center; padding: 60px 20px; color: var(--muted); }
-  .error {
-    background: rgba(245,112,111,.08); border: 1px solid var(--bad);
-    color: var(--bad); padding: 16px; font-size: 12px; line-height: 1.5;
+  button.primary:hover { opacity: 0.9; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--muted);
   }
-  .error a { color: var(--brand); text-decoration: none; }
-  .rewrite-result {
-    background: var(--surface); border: 1px solid var(--brand);
-    padding: 12px; margin-bottom: 12px; max-height: 280px; overflow-y: auto;
-    font-size: 12px; line-height: 1.5;
-    -webkit-user-select: text; user-select: text;
+  button.ghost:hover { color: var(--text); border-color: var(--border); }
+
+  /* Bottom action row (shown on score view) */
+  .bottom-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .bottom-actions button { flex: 1; padding: 9px; }
+
+  /* ── Rewrite result view ── */
+  .rewrite-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 6px;
+    flex-shrink: 0;
+  }
+  .rewrite-block {
+    background: var(--surface);
+    border-radius: 6px;
+    padding: 12px;
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-y: auto;
+    flex: 1;
+    -webkit-user-select: text;
+    user-select: text;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* ── Loading ── */
+  .loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* ── Error ── */
+  .error-card {
+    background: #FEF5F5;
+    border: 1px solid #F0C0BF;
+    border-radius: 6px;
+    padding: 14px;
+    font-size: 13px;
+    color: var(--cat-structure);
+    line-height: 1.5;
+    flex-shrink: 0;
+  }
+
+  /* ── Upgrade card ── */
+  .upgrade-card {
+    background: #FFF8F2;
+    border: 1px solid #F5D6BB;
+    border-radius: 6px;
+    padding: 14px;
+    flex-shrink: 0;
+  }
+  .upgrade-card p {
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .upgrade-btn {
+    width: 100%;
+    background: var(--brand);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .upgrade-btn:hover { opacity: 0.9; }
+
+  /* ── No issues ── */
+  .no-issues {
+    background: #F4F6F0;
+    border: 1px solid #D6DEC8;
+    border-radius: 6px;
+    padding: 14px;
+    font-size: 13px;
+    color: var(--cat-context);
+    line-height: 1.5;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  /* ── Inline rewrite loading in card ── */
+  .card-rewriting {
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--muted);
   }
 </style>
 </head>
 <body>
   <div class="header">
-    <span class="brand">[·] regression.guard</span>
+    <span class="brand">regression.guard</span>
     <span class="close" id="close" aria-label="Close">×</span>
   </div>
-  <div id="content"></div>
+  <div id="content" style="display:contents;"></div>
   <script type="module" src="./result-renderer.js"></script>
 </body>
 </html>

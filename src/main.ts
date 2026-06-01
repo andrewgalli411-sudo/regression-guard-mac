@@ -1,4 +1,4 @@
-import { app, ipcMain, BrowserWindow, Menu } from "electron";
+import { app, ipcMain, BrowserWindow, Menu, Notification } from "electron";
 import { initUpdater } from "./updater";
 import { createTray, rebuildMenu } from "./tray";
 import { registerHotkey, unregisterAll } from "./hotkey";
@@ -157,6 +157,10 @@ app.whenReady().then(() => {
 
   ipcMain.handle("get-app-version", () => app.getVersion());
 
+  ipcMain.on("notify", (_event, title: string, body: string) => {
+    new Notification({ title, body }).show();
+  });
+
   ipcMain.on("complete-onboarding", () => {
     getOnboardingWindow()?.close();
     app.dock?.hide();
@@ -172,7 +176,7 @@ app.whenReady().then(() => {
 function errorMessage(err: ApiError): string {
   switch (err.type) {
     case "unauthorized":   return "Invalid API key. Update it in Settings.";
-    case "quota_exceeded": return "Monthly quota exceeded. Upgrade for more.";
+    case "quota_exceeded": return "You've used all your rewrites this month. Upgrade for unlimited.";
     case "rate_limited":   return "Too many requests — try again in a minute.";
     case "network":        return "Network error. Check your connection.";
     case "server":         return `Server error (HTTP ${err.status}).`;

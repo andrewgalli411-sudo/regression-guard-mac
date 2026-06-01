@@ -5,53 +5,64 @@
 <title>Welcome to regression.guard</title>
 <style>
   :root {
-    --bg: #0a0e1a; --surface: #0f1424; --border: #1f2940;
-    --text: #e8eaf0; --muted: #8a96b0; --dim: #6f7c98;
-    --brand: #6ff58a; --bad: #f5706f;
+    --bg: #FAF8F4;
+    --surface: #F0EDE8;
+    --border: #E2DDD6;
+    --text: #1C1A1A;
+    --muted: #6B6560;
+    --dim: #A09890;
+    --brand: #E8985B;
+    --bad: #C8413A;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     background: var(--bg); color: var(--text);
-    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-family: system-ui, -apple-system, "Helvetica Neue", sans-serif;
     font-size: 13px; height: 100vh; overflow: hidden;
   }
   body { display: flex; flex-direction: column; padding: 32px; }
-  .brand { color: var(--brand); font-size: 12px; margin-bottom: 24px; }
+  .brand { color: var(--dim); font-size: 11px; letter-spacing: 0.03em; margin-bottom: 24px; }
   .step { display: none; flex-direction: column; flex: 1; }
   .step.active { display: flex; }
-  h1 { font-size: 22px; font-weight: 500; margin-bottom: 12px; }
-  h2 { font-size: 16px; font-weight: 500; margin-bottom: 8px; color: var(--text); }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.01em; }
+  h2 { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
   p { color: var(--muted); line-height: 1.6; margin-bottom: 16px; font-size: 13px; }
   input[type="text"], input[type="password"] {
-    width: 100%; background: var(--surface); border: 1px solid var(--border);
-    color: var(--text); padding: 12px 14px; font-family: inherit; font-size: 13px; outline: none;
+    width: 100%; background: white; border: 1px solid var(--border);
+    color: var(--text); padding: 12px 14px;
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 13px; outline: none; border-radius: 4px;
   }
-  input:focus { border-color: var(--brand); }
-  label { display: block; margin-bottom: 8px; font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; }
+  input:focus { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(232,152,91,0.15); }
+  label { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
   .actions { display: flex; gap: 8px; margin-top: auto; padding-top: 24px; }
   button {
     flex: 1; background: transparent; border: 1px solid var(--border);
-    color: var(--text); padding: 12px; font-family: inherit; font-size: 13px; cursor: pointer;
+    color: var(--text); padding: 12px; font-family: inherit; font-size: 13px;
+    font-weight: 500; cursor: pointer; border-radius: 4px;
   }
-  button.primary { background: var(--brand); color: var(--bg); border-color: var(--brand); font-weight: 500; }
+  button.primary { background: var(--brand); color: white; border-color: var(--brand); }
   button:hover { border-color: var(--muted); }
   button.primary:hover { opacity: 0.9; }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
   .progress { display: flex; gap: 6px; margin-bottom: 24px; }
-  .dot { width: 24px; height: 4px; background: var(--border); }
+  .dot { width: 24px; height: 4px; background: var(--border); border-radius: 2px; }
   .dot.active { background: var(--brand); }
   .error { color: var(--bad); font-size: 12px; margin-top: 8px; }
-  .ok { color: var(--brand); font-size: 12px; margin-top: 8px; }
+  .ok { color: #6B7A4B; font-size: 12px; margin-top: 8px; }
   .link { color: var(--brand); text-decoration: none; cursor: pointer; }
   .link:hover { text-decoration: underline; }
   .hotkey-display {
     background: var(--surface); border: 1px solid var(--border);
-    padding: 16px; text-align: center; font-size: 18px; margin: 16px 0; color: var(--brand);
+    border-radius: 6px; padding: 16px; text-align: center;
+    font-size: 20px; margin: 16px 0; color: var(--text);
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-weight: 600;
   }
 </style>
 </head>
 <body>
-  <div class="brand">[·] regression.guard</div>
+  <div class="brand">regression.guard</div>
   <div class="progress">
     <div class="dot active" id="dot-0"></div>
     <div class="dot" id="dot-1"></div>
@@ -61,8 +72,8 @@
   <!-- Step 1: Welcome -->
   <div class="step active" data-step="0">
     <h1>Highlight any prompt, get an instant fix</h1>
-    <p>regression.guard scores LLM prompts wherever you write them — your editor, your browser, your terminal, your notes. Select text anywhere on your Mac, hit a hotkey, get a quality score and a rewrite suggestion in 5 seconds.</p>
-    <p>This 60-second setup gets you running.</p>
+    <p>regression.guard reads your prompt and tells you exactly what to fix before you send it to a model.</p>
+    <p>Select text anywhere on your Mac, press a hotkey, and get a quality score and rewrite in seconds. This 60-second setup gets you running.</p>
     <div class="actions">
       <button class="primary" id="start">Get started</button>
     </div>
@@ -86,7 +97,7 @@
     <h2>Your hotkey</h2>
     <p>Select any text, press <strong>Cmd+C</strong> to copy it, then press this hotkey. The app reads directly from the clipboard — no extra permissions needed.</p>
     <div class="hotkey-display" id="hotkey-display">⌘ ⇧ R</div>
-    <p style="font-size: 12px;">You can change the hotkey later in Settings.</p>
+    <p style="font-size: 12px; color: var(--dim);">You can change the hotkey later in Settings.</p>
     <div class="actions">
       <button id="back-2">Back</button>
       <button class="primary" id="finish">Start using regression.guard</button>
