@@ -11,7 +11,7 @@ export function createResultWindow(): BrowserWindow {
   if (resultWindow && !resultWindow.isDestroyed()) return resultWindow;
 
   resultWindow = new BrowserWindow({
-    width: 420,
+    width: 480,
     height: 520,
     show: false,
     frame: false,

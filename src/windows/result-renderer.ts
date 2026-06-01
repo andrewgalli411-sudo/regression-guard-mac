@@ -78,9 +78,9 @@ let currentIssues: Issue[] = [];
 // ── Score ring ────────────────────────────────────────────────────────────────
 
 function scoreColor(s: number): string {
-  if (s <= 40) return "#C8413A";
+  if (s <= 40) return "#f5706f";
   if (s <= 70) return "#E8985B";
-  return "#6B7A4B";
+  return "#6ff58a";
 }
 
 function renderRing(score: number): string {
@@ -147,9 +147,15 @@ function renderSuccess(rawScore: number, issues: Issue[]) {
   const score = Math.round(rawScore * 10);
   const noIssues = issues.length === 0;
 
+  let prevCategory: string | null = null;
   const cardRows = issues
     .slice(0, 5)
-    .map((issue, idx) => renderCard(issue, idx))
+    .map((issue, idx) => {
+      const cat = (issue.category || "").toLowerCase();
+      const showLabel = cat !== prevCategory;
+      prevCategory = cat;
+      return renderCard(issue, idx, showLabel);
+    })
     .join("");
 
   const issuesBlock = noIssues
@@ -221,7 +227,7 @@ function renderSuccess(rawScore: number, issues: Issue[]) {
   });
 }
 
-function renderCard(issue: Issue, idx: number): string {
+function renderCard(issue: Issue, idx: number, showLabel = true): string {
   const color = issueColor(issue);
   const label = issueLabel(issue);
   const desc = escapeHtml(issue.description || "");
@@ -229,7 +235,7 @@ function renderCard(issue: Issue, idx: number): string {
   return `
     <div class="card" style="border-left-color:${color};">
       <div class="card-body">
-        <div class="card-cat" style="color:${color};">${label}</div>
+        ${showLabel ? `<div class="card-cat" style="color:${color};">${label}</div>` : ""}
         <div class="card-desc">${desc}</div>
       </div>
       <div class="card-expanded">

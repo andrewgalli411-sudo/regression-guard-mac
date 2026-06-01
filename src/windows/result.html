@@ -5,20 +5,20 @@
 <title>regression.guard</title>
 <style>
   :root {
-    --bg: #FAF8F4;
-    --surface: #F0EDE8;
-    --border: #E2DDD6;
-    --text: #1C1A1A;
-    --muted: #6B6560;
-    --dim: #A09890;
-    --brand: #E8985B;
+    --bg: #0a0e1a;
+    --surface: #0f1424;
+    --border: #1f2940;
+    --text: #e8eaf0;
+    --muted: #8a96b0;
+    --dim: #6f7c98;
+    --brand: #6ff58a;
     --cat-structure: #C8413A;
     --cat-clarity: #2D9DA8;
     --cat-context: #6B7A4B;
     --cat-modelfit: #7B4FB5;
-    --score-low: #C8413A;
+    --score-low: #f5706f;
     --score-mid: #E8985B;
-    --score-high: #6B7A4B;
+    --score-high: #6ff58a;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
@@ -31,7 +31,7 @@
     -webkit-user-select: none;
     user-select: none;
   }
-  body { display: flex; flex-direction: column; padding: 14px 16px; gap: 10px; }
+  body { display: flex; flex-direction: column; padding: 32px 36px; gap: 10px; }
 
   /* ── Header ── */
   .header {
@@ -57,6 +57,7 @@
     border-radius: 8px;
     border: 1px solid var(--border);
     flex-shrink: 0;
+    margin-bottom: 24px;
   }
   .score-ring-wrap {
     position: relative;
@@ -108,12 +109,12 @@
   .cards {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 10px;
     overflow-y: auto;
     flex: 1;
   }
   .card {
-    background: white;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-left: 3px solid var(--border);
     border-radius: 6px;
@@ -121,9 +122,9 @@
     cursor: pointer;
     transition: box-shadow 150ms;
   }
-  .card:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  .card.open { box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
-  .card-body { padding: 10px 12px; }
+  .card:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+  .card.open { box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+  .card-body { padding: 14px 16px; }
   .card-cat {
     font-size: 10px;
     font-weight: 600;
@@ -134,7 +135,9 @@
   .card-desc {
     font-size: 13px;
     color: var(--text);
-    line-height: 1.4;
+    line-height: 1.5;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
   }
   .card-expanded {
     display: none;
@@ -152,7 +155,7 @@
     border: 1px solid var(--border);
     background: transparent;
     color: var(--text);
-    padding: 7px 14px;
+    padding: 10px 18px;
     font-family: inherit;
     font-size: 12px;
     font-weight: 500;
@@ -218,8 +221,8 @@
 
   /* ── Error ── */
   .error-card {
-    background: #FEF5F5;
-    border: 1px solid #F0C0BF;
+    background: rgba(200,65,58,0.12);
+    border: 1px solid rgba(200,65,58,0.3);
     border-radius: 6px;
     padding: 14px;
     font-size: 13px;
@@ -230,8 +233,8 @@
 
   /* ── Upgrade card ── */
   .upgrade-card {
-    background: #FFF8F2;
-    border: 1px solid #F5D6BB;
+    background: rgba(232,152,91,0.10);
+    border: 1px solid rgba(232,152,91,0.25);
     border-radius: 6px;
     padding: 14px;
     flex-shrink: 0;
@@ -258,8 +261,8 @@
 
   /* ── No issues ── */
   .no-issues {
-    background: #F4F6F0;
-    border: 1px solid #D6DEC8;
+    background: rgba(111,245,138,0.08);
+    border: 1px solid rgba(111,245,138,0.2);
     border-radius: 6px;
     padding: 14px;
     font-size: 13px;
