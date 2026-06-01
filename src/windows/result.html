@@ -162,7 +162,7 @@
   .cards {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 4px;
     overflow-y: auto;
     flex: 1;
   }
@@ -173,37 +173,40 @@
     border-radius: 6px;
     overflow: hidden;
     cursor: pointer;
-    transition: box-shadow 150ms;
+    transition: background 120ms;
   }
-  .card:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
-  .card.open { box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
-  .card-body { padding: 14px 16px; }
+  .card:hover { background: var(--elevated); }
+  .card-body {
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
   .card-cat {
     font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-family: var(--font-chrome);
-    margin-bottom: 4px;
   }
+  .card-chevron { transition: transform 120ms; }
+  .card.open .card-chevron { transform: rotate(90deg); }
   .card-desc {
+    display: none;
     font-size: 13px;
-    color: var(--text);
-    font-family: var(--font-user-content);
+    color: var(--muted);
+    font-family: var(--font-body);
     line-height: 1.5;
     word-wrap: break-word;
     overflow-wrap: anywhere;
+    padding: 0 14px 12px 14px;
   }
+  .card.open .card-desc { display: block; }
   .card-expanded {
     display: none;
-    border-top: 1px solid var(--border);
+    padding: 0 14px 12px 14px;
   }
-  .card.open .card-expanded { display: block; }
-  .card-actions {
-    display: flex;
-    gap: 6px;
-    padding: 8px 12px;
-  }
+  .card.open .card-expanded { display: flex; gap: 8px; }
 
   /* ── Buttons ── */
   button {

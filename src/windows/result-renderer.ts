@@ -225,14 +225,15 @@ function renderCard(issue: Issue, idx: number, showLabel = true): string {
   return `
     <div class="card" style="border-left-color:${color};">
       <div class="card-body">
-        ${showLabel ? `<div class="card-cat" style="color:${color};">${label}</div>` : ""}
-        <div class="card-desc">${desc}</div>
+        ${showLabel
+          ? `<div class="card-cat" style="color:${color};">${label}</div>`
+          : `<div class="card-cat" style="visibility:hidden;">${label}</div>`}
+        <span class="card-chevron" style="margin-left:auto;color:var(--dim);font-size:11px;">▸</span>
       </div>
+      <div class="card-desc">${desc}</div>
       <div class="card-expanded">
-        <div class="card-actions">
-          <button class="primary card-apply" data-idx="${idx}">Apply Rewrite</button>
-          <button class="ghost card-dismiss">Dismiss</button>
-        </div>
+        <button class="primary card-apply" data-idx="${idx}">Apply Rewrite</button>
+        <button class="ghost card-dismiss">Dismiss</button>
       </div>
     </div>
   `;
