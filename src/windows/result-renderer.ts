@@ -34,6 +34,38 @@ function issueLabel(issue: Issue): string {
   return CAT_LABEL[cat] ?? SEV_LABEL[(issue.severity || "low").toLowerCase()] ?? "Issue";
 }
 
+function highestSeverity(issues: Issue[]): Issue {
+  const rank: Record<string, number> = { high: 3, medium: 2, low: 1 };
+  return [...issues].sort(
+    (a, b) =>
+      (rank[(b.severity || "low").toLowerCase()] ?? 0) -
+      (rank[(a.severity || "low").toLowerCase()] ?? 0)
+  )[0];
+}
+
+function renderGroupCard(category: string, groupIssues: Issue[]): string {
+  const color = issueColor(highestSeverity(groupIssues));
+  const label = issueLabel({ category });
+  const bullets = groupIssues
+    .map(i => `<li>${escapeHtml(i.description || "")}</li>`)
+    .join("");
+
+  return `
+    <div class="card" style="border-left-color:${color};">
+      <div class="card-body">
+        <div class="card-cat" style="color:${color};">${label}</div>
+        <span class="card-count">${groupIssues.length}</span>
+        <span class="card-chevron" style="margin-left:auto;color:var(--dim);font-size:11px;">▸</span>
+      </div>
+      <ul class="card-desc-list">${bullets}</ul>
+      <div class="card-expanded">
+        <button class="primary card-apply" data-cat="${escapeHtml(category)}">Apply Rewrite</button>
+        <button class="ghost card-dismiss">Dismiss</button>
+      </div>
+    </div>
+  `;
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface Issue {
@@ -137,15 +169,14 @@ function renderSuccess(rawScore: number, issues: Issue[]) {
   const score = Math.round(rawScore * 10);
   const noIssues = issues.length === 0;
 
-  let prevCategory: string | null = null;
-  const cardRows = issues
-    .slice(0, 5)
-    .map((issue, idx) => {
-      const cat = (issue.category || "").toLowerCase();
-      const showLabel = cat !== prevCategory;
-      prevCategory = cat;
-      return renderCard(issue, idx, showLabel);
-    })
+  const grouped = new Map<string, Issue[]>();
+  for (const issue of issues.slice(0, 5)) {
+    const cat = (issue.category || "uncategorized").toLowerCase();
+    if (!grouped.has(cat)) grouped.set(cat, []);
+    grouped.get(cat)!.push(issue);
+  }
+  const cardRows = [...grouped.entries()]
+    .map(([cat, groupIssues]) => renderGroupCard(cat, groupIssues))
     .join("");
 
   const issuesBlock = noIssues
@@ -154,7 +185,7 @@ function renderSuccess(rawScore: number, issues: Issue[]) {
 
   const summaryText = noIssues
     ? "No issues detected"
-    : `${issues.slice(0, 5).length} issue${issues.length !== 1 ? "s" : ""} found`;
+    : `${grouped.size} categor${grouped.size !== 1 ? "ies" : "y"}, ${issues.slice(0, 5).length} issue${issues.slice(0, 5).length !== 1 ? "s" : ""}`;
 
   setContent(`
     <div class="score-header">
@@ -173,19 +204,19 @@ function renderSuccess(rawScore: number, issues: Issue[]) {
   `);
 
   // Card expand/collapse
-  content.querySelectorAll<HTMLElement>(".card").forEach((card) => {
-    card.addEventListener("click", (e) => {
-      // Don't toggle if clicking a button inside the card
+  content.querySelectorAll<HTMLElement>(".card-body").forEach((cardBody) => {
+    cardBody.addEventListener("click", (e) => {
       if ((e.target as HTMLElement).closest("button")) return;
-      card.classList.toggle("open");
+      cardBody.closest<HTMLElement>(".card")?.classList.toggle("open");
     });
   });
 
   // Per-card Apply Rewrite
   content.querySelectorAll<HTMLButtonElement>(".card-apply").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const idx = Number(btn.dataset.idx);
-      handleRewrite(btn, [issues[idx]]);
+      const cat = btn.dataset.cat ?? "";
+      const groupIssues = grouped.get(cat) ?? [];
+      handleRewrite(btn, groupIssues);
     });
   });
 
@@ -215,28 +246,6 @@ function renderSuccess(rawScore: number, issues: Issue[]) {
     const btn = document.getElementById("rewrite-all") as HTMLButtonElement;
     handleRewrite(btn, currentIssues);
   });
-}
-
-function renderCard(issue: Issue, idx: number, showLabel = true): string {
-  const color = issueColor(issue);
-  const label = issueLabel(issue);
-  const desc = escapeHtml(issue.description || "");
-
-  return `
-    <div class="card" style="border-left-color:${color};">
-      <div class="card-body">
-        ${showLabel
-          ? `<div class="card-cat" style="color:${color};">${label}</div>`
-          : `<div class="card-cat" style="visibility:hidden;">${label}</div>`}
-        <span class="card-chevron" style="margin-left:auto;color:var(--dim);font-size:11px;">▸</span>
-      </div>
-      <div class="card-desc">${desc}</div>
-      <div class="card-expanded">
-        <button class="primary card-apply" data-idx="${idx}">Apply Rewrite</button>
-        <button class="ghost card-dismiss">Dismiss</button>
-      </div>
-    </div>
-  `;
 }
 
 // ── Render: rewrite ───────────────────────────────────────────────────────────

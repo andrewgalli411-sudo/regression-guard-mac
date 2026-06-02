@@ -191,17 +191,32 @@
   }
   .card-chevron { transition: transform 120ms; }
   .card.open .card-chevron { transform: rotate(90deg); }
-  .card-desc {
+  .card-count {
+    font-family: var(--font-chrome);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-left: 4px;
+  }
+  .card-desc-list {
     display: none;
+    list-style: none;
+    padding: 0 14px 12px 14px;
+    margin: 0;
+  }
+  .card.open .card-desc-list { display: block; }
+  .card-desc-list li {
+    font-family: var(--font-body);
     font-size: 13px;
     color: var(--text);
-    font-family: var(--font-body);
     line-height: 1.5;
+    padding: 6px 0 6px 12px;
+    border-left: 2px solid var(--border);
+    margin-bottom: 4px;
     word-wrap: break-word;
     overflow-wrap: anywhere;
-    padding: 0 14px 12px 14px;
   }
-  .card.open .card-desc { display: block; }
+  .card-desc-list li:last-child { margin-bottom: 0; }
   .card.open { margin: 4px 0; }
   .card-expanded {
     display: none;
