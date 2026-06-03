@@ -32,10 +32,6 @@ export function createResultWindow(): BrowserWindow {
   // __dirname = dist/windows/ at runtime; result.html is copied there by build
   resultWindow.loadFile(path.join(__dirname, "result.html"));
 
-  resultWindow.on("blur", () => {
-    if (resultWindow && !resultWindow.isDestroyed()) resultWindow.hide();
-  });
-
   return resultWindow;
 }
 

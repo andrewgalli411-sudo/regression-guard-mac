@@ -43,9 +43,8 @@ function highestSeverity(issues: Issue[]): Issue {
   )[0];
 }
 
-function renderGroupCard(category: string, groupIssues: Issue[]): string {
+function renderGroupCard(label: string, groupIssues: Issue[]): string {
   const color = issueColor(highestSeverity(groupIssues));
-  const label = issueLabel({ category });
   const bullets = groupIssues
     .map(i => `<li>${escapeHtml(i.description || "")}</li>`)
     .join("");
@@ -59,7 +58,7 @@ function renderGroupCard(category: string, groupIssues: Issue[]): string {
       </div>
       <ul class="card-desc-list">${bullets}</ul>
       <div class="card-expanded">
-        <button class="primary card-apply" data-cat="${escapeHtml(category)}">Apply Rewrite</button>
+        <button class="primary card-apply" data-label="${escapeHtml(label)}">Apply Rewrite</button>
         <button class="ghost card-dismiss">Dismiss</button>
       </div>
     </div>
@@ -171,36 +170,39 @@ function renderSuccess(rawScore: number, issues: Issue[]) {
 
   const grouped = new Map<string, Issue[]>();
   for (const issue of issues.slice(0, 5)) {
-    const cat = (issue.category || "uncategorized").toLowerCase();
-    if (!grouped.has(cat)) grouped.set(cat, []);
-    grouped.get(cat)!.push(issue);
+    const key = issueLabel(issue);
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key)!.push(issue);
   }
   const cardRows = [...grouped.entries()]
-    .map(([cat, groupIssues]) => renderGroupCard(cat, groupIssues))
+    .map(([label, groupIssues]) => renderGroupCard(label, groupIssues))
     .join("");
-
-  const issuesBlock = noIssues
-    ? `<div class="no-issues">No issues found — your prompt is in good shape.</div>`
-    : `<div class="section-label">Issues</div><div class="cards">${cardRows}</div>`;
 
   const summaryText = noIssues
     ? "No issues detected"
     : `${grouped.size} categor${grouped.size !== 1 ? "ies" : "y"}, ${issues.slice(0, 5).length} issue${issues.slice(0, 5).length !== 1 ? "s" : ""}`;
 
   setContent(`
-    <div class="score-header">
-      ${renderRing(score)}
-      <div class="score-meta">
-        <div class="score-label">Prompt Health</div>
-        <div class="score-summary">${summaryText}</div>
+    <div class="popup-shell">
+      <div class="header-fixed">
+        <div class="score-header">
+          ${renderRing(score)}
+          <div class="score-meta">
+            <div class="score-label">Prompt Health</div>
+            <div class="score-summary">${summaryText}</div>
+          </div>
+        </div>
+        ${noIssues ? "" : `<div class="section-label">Issues</div>`}
       </div>
+      ${noIssues
+        ? `<div class="no-issues">No issues found — your prompt is in good shape.</div>`
+        : `<div class="cards">${cardRows}</div>`}
+      ${noIssues ? "" : `
+      <div class="bottom-actions-fixed">
+        <button class="ghost" id="dismiss-all">Done</button>
+        <button class="primary" id="rewrite-all">Rewrite prompt</button>
+      </div>`}
     </div>
-    ${issuesBlock}
-    ${noIssues ? "" : `
-    <div class="bottom-actions">
-      <button class="ghost" id="dismiss-all">Done</button>
-      <button class="primary" id="rewrite-all">Rewrite prompt</button>
-    </div>`}
   `);
 
   // Card expand/collapse
@@ -214,8 +216,8 @@ function renderSuccess(rawScore: number, issues: Issue[]) {
   // Per-card Apply Rewrite
   content.querySelectorAll<HTMLButtonElement>(".card-apply").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const cat = btn.dataset.cat ?? "";
-      const groupIssues = grouped.get(cat) ?? [];
+      const label = btn.dataset.label ?? "";
+      const groupIssues = grouped.get(label) ?? [];
       handleRewrite(btn, groupIssues);
     });
   });
@@ -234,7 +236,7 @@ function renderSuccess(rawScore: number, issues: Issue[]) {
           })
         );
         content.querySelector(".section-label")?.remove();
-        content.querySelector(".bottom-actions")?.remove();
+        content.querySelector(".bottom-actions-fixed")?.remove();
       }
     });
   });

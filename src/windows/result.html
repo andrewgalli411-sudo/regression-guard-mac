@@ -165,7 +165,28 @@
     gap: 4px;
     overflow-y: auto;
     flex: 1;
+    min-height: 0;
+    padding-right: 4px;
   }
+
+  /* ── Popup shell (sticky header + scrolling cards + sticky footer) ── */
+  .popup-shell {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+  .header-fixed {
+    flex-shrink: 0;
+    padding-bottom: 12px;
+  }
+  .bottom-actions-fixed {
+    flex-shrink: 0;
+    padding-top: 8px;
+    display: flex;
+    gap: 8px;
+  }
+  .bottom-actions-fixed button { flex: 1; padding: 9px; }
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
