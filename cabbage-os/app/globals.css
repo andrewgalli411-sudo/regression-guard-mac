@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Chart roles. Series colors are validated against the dark chart surface
+ * (#111614) with the data-viz palette validator:
+ *   revenue/cost  green #57a838 ↔ magenta #d55181  — CVD ΔE 9.1, normal ΔE 31.8
+ *   home/super    blue  #3987e5 ↔ yellow  #c98500  — CVD ΔE 27.4, normal ΔE 30.7
+ * No chart here carries more than two series, so the all-pairs gate doesn't apply.
+ * Green ↔ orange (the obvious "profit vs cost" pair) hard-fails deutan separation
+ * at ΔE 3.0 — that's why cost is magenta.
+ */
+:root {
+  color-scheme: dark;
+  --surface-1: #111614;
+  --text-primary: #f2f5f2;
+  --text-secondary: #a8b3ad;
+  --text-muted: #6d7a73;
+  --grid: #212b26;
+  --series-revenue: #57a838;
+  --series-cost: #d55181;
+  --series-home: #3987e5;
+  --series-super: #c98500;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  background: #080b0a;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Tabular figures everywhere money appears — columns of numbers must align. */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #242f29;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.75; }
+  70% { transform: scale(1.9); opacity: 0; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+.pin-pulse {
+  animation: pulse-ring 2.6s cubic-bezier(0.24, 0.6, 0.4, 1) infinite;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin-pulse { animation: none; }
+}
