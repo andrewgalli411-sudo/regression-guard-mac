@@ -207,6 +207,7 @@ async def _run(
             raise typer.Exit(1)
         artifact.test_cases = cases
         art.save_cached_cases(Path(cache_dir), cache_key, cases)
+        persist()  # so a crash before eval keeps the cases in the artifact, not only the cache
         console.print(f"Generated {len(cases)} test cases.")
 
     # 6. Evaluate — on a fresh run, pre-flight one call so an API-rejected tool

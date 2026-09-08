@@ -4,5 +4,6 @@ __pycache__/
 .pytest_cache/
 # run outputs / caches
 mcp-audit-run/
+smoke-run/
 .mcp-audit-cache/
 SCRATCHPATH/

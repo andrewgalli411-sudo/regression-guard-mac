@@ -14,7 +14,7 @@ import re
 from dataclasses import dataclass
 
 import anthropic
-from anthropic import NOT_GIVEN, AsyncAnthropic
+from anthropic import AsyncAnthropic
 
 from .models import ToolRecord
 
@@ -215,8 +215,11 @@ class LLM:
             "messages": [{"role": "user", "content": query}],
             "tools": tools,
             "tool_choice": {"type": "auto"},
-            "temperature": temperature if temperature is not None else NOT_GIVEN,
         }
+        # anthropic>=1.x dropped `temperature` from messages.create(); route it
+        # through extra_body for the models that still accept sampling params.
+        if temperature is not None:
+            kwargs["extra_body"] = {"temperature": temperature}
         resp, attempts = await self._with_retries(
             lambda: self.client.messages.create(**kwargs)
         )
