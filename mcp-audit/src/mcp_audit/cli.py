@@ -16,7 +16,7 @@ from rich.console import Console
 
 from . import artifact as art
 from .connect import ConnectionError_, discover
-from .evaluate import run_evaluation
+from .evaluate import preflight, run_evaluation
 from .generate import (
     _negative_prompt,
     _noise_prompt,
@@ -209,7 +209,12 @@ async def _run(
         art.save_cached_cases(Path(cache_dir), cache_key, cases)
         console.print(f"Generated {len(cases)} test cases.")
 
-    # 6. Evaluate
+    # 6. Evaluate — on a fresh run, pre-flight one call so an API-rejected tool
+    # list fails fast (clean message, no burned sweep) rather than 300 per-case
+    # errors. Skipped when resuming a run that already has successful evals.
+    already_started = any(e.error is None for e in artifact.evaluations)
+    if artifact.test_cases and not already_started:
+        await preflight(llm, artifact, eff_temp)
     artifact.status = "evaluating"
     persist()
     await run_evaluation(llm, artifact, persist, concurrency, eff_temp, console=console)
@@ -289,6 +294,16 @@ def run(
             "(or run `ant auth login`) and retry."
         )
         raise typer.Exit(2)
+    except anthropic.BadRequestError as e:
+        # Fail fast (before spending on a full sweep) when the API rejects the
+        # request — most often a tool inputSchema the server exposed that the
+        # Messages API won't accept.
+        console.print(
+            "[red]The Anthropic API rejected the request.[/red] This usually means one "
+            "of the server's tool schemas isn't accepted as a tool definition.\n"
+            f"[dim]{e}[/dim]"
+        )
+        raise typer.Exit(3)
 
 
 @app.command()

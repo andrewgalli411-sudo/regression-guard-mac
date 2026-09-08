@@ -63,6 +63,23 @@ def test_build_anthropic_tools_sanitizes_and_fixes_schema():
     assert "description" not in weird
 
 
+def test_schema_sanitization():
+    # $schema/$defs/etc. stripped; non-object type forced to object; properties ensured
+    dirty = ToolRecord(
+        name="t",
+        input_schema={
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$defs": {"X": {"type": "string"}},
+            "type": "string",
+        },
+    )
+    tools, _ = build_anthropic_tools([dirty])
+    sch = tools[0]["input_schema"]
+    assert "$schema" not in sch and "$defs" not in sch
+    assert sch["type"] == "object"
+    assert "properties" in sch
+
+
 def test_build_anthropic_tools_dedupes():
     tools = [
         ToolRecord(name="a.b", input_schema={}),

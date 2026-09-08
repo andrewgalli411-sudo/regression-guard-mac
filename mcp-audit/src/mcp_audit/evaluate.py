@@ -86,6 +86,16 @@ async def _eval_one(
     )
 
 
+async def preflight(llm: LLM, artifact: RunArtifact, temperature: float | None) -> None:
+    """One real selection call before the sweep. Exceptions propagate (unlike the
+    per-case loop, which records them), so an API-rejected tool list or bad
+    credential fails fast and clearly instead of burning the whole run as errors."""
+    anthropic_tools, _ = build_anthropic_tools(artifact.tool_set.tools)
+    await llm.select_tool(
+        artifact.config.eval_model, "hello", anthropic_tools, temperature, max_tokens=64
+    )
+
+
 async def run_evaluation(
     llm: LLM,
     artifact: RunArtifact,

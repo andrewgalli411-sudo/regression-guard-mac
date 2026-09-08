@@ -78,6 +78,25 @@ def _sanitize_name(name: str) -> str:
     return s or "tool"
 
 
+# Top-level JSON-Schema keys real MCP servers emit that the Messages API's
+# input_schema rejects or doesn't want.
+_SCHEMA_STRIP_KEYS = ("$schema", "$id", "$ref", "$defs", "definitions", "id")
+
+
+def _sanitize_schema(schema) -> dict:
+    """Coerce an MCP tool's inputSchema into something the Messages API accepts:
+    a JSON-Schema object with top-level ``type: object``. We strip only top-level
+    dialect/reference keys and never rewrite nested shapes (that would change what
+    the model sees). A non-dict or non-object schema degrades to an empty object."""
+    if not isinstance(schema, dict) or not schema:
+        return {"type": "object", "properties": {}}
+    cleaned = {k: v for k, v in schema.items() if k not in _SCHEMA_STRIP_KEYS}
+    if cleaned.get("type") != "object":
+        cleaned["type"] = "object"
+    cleaned.setdefault("properties", {})
+    return cleaned
+
+
 def build_anthropic_tools(
     tools: list[ToolRecord],
 ) -> tuple[list[dict], dict[str, str]]:
@@ -101,13 +120,7 @@ def build_anthropic_tools(
         used.add(candidate)
         name_map[candidate] = t.name
 
-        schema = t.input_schema if isinstance(t.input_schema, dict) else {}
-        if not schema:
-            schema = {"type": "object", "properties": {}}
-        elif "type" not in schema:
-            schema = {**schema, "type": "object"}
-
-        tool_def: dict = {"name": candidate, "input_schema": schema}
+        tool_def: dict = {"name": candidate, "input_schema": _sanitize_schema(t.input_schema)}
         if t.description:
             tool_def["description"] = t.description
         out.append(tool_def)
