@@ -8,3 +8,5 @@ smoke-run/
 .mcp-audit-cache/
 SCRATCHPATH/
 *-audit/
+.env
+.npm-tools/

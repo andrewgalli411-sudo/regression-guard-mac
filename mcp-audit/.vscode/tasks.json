@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "uv sync",
+      "type": "shell",
+      "command": "uv sync",
+      "problemMatcher": []
+    },
+    {
+      "label": "pytest",
+      "type": "shell",
+      "command": "uv run pytest -q",
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "audit: demo server",
+      "type": "shell",
+      "command": "uv run mcp-audit run --stdio \"python examples/demo_server.py\" -n 3 --negatives-per-tool 2 --yes",
+      "problemMatcher": []
+    },
+    {
+      "label": "audit: memory server",
+      "type": "shell",
+      "command": "./examples/run-memory-audit.sh --yes",
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "// note": "VS Code MCP client config. Lets Copilot Chat (Agent mode) run these MCP servers as tools. These are the same servers mcp-audit audits — 'filesystem' gives file-reading tools scoped to this folder. Requires a recent VS Code with MCP support.",
+  "servers": {
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${workspaceFolder}"]
+    },
+    "memory": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    }
+  }
+}
