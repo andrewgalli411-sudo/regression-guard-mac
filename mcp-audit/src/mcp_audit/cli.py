@@ -34,6 +34,13 @@ console = Console()
 GEN_MODEL_DEFAULT = "claude-sonnet-5"
 EVAL_MODEL_DEFAULT = "claude-haiku-4-5"
 
+# Output-token guesses for the cost estimate (input is measured exactly via
+# count_tokens). Tuned against real runs to sit at/above actual, plus a margin —
+# a spend guardrail must over-estimate, never under. See _estimate_cost.
+_GEN_OUT_TOKENS_PER_QUERY = 45   # a generated query is a full sentence in a JSON array
+_EVAL_OUT_TOKENS_PER_CALL = 110  # a tool_use block with populated arguments
+_ESTIMATE_SAFETY_MARGIN = 1.15
+
 
 async def _estimate_cost(
     llm: LLM,
@@ -58,26 +65,31 @@ async def _estimate_cost(
             gen_model, [{"role": "user", "content": _noise_prompt(tools, max(noise_n, 1))}]
         )
         gen_in = sample_in * len(tools) + noise_in
-        gen_out = len(tools) * positives_per_tool * 25 + noise_n * 25
+        gen_out = (len(tools) * positives_per_tool + noise_n) * _GEN_OUT_TOKENS_PER_QUERY
         if negatives_per_tool > 0 and len(tools) > 1:
             neg_in = await llm.count_input_tokens(
                 gen_model,
                 [{"role": "user", "content": _negative_prompt(tools[0], tools[1:], negatives_per_tool)}],
             )
             gen_in += neg_in * len(tools)
-            gen_out += len(tools) * negatives_per_tool * 25
+            gen_out += len(tools) * negatives_per_tool * _GEN_OUT_TOKENS_PER_QUERY
         gen_usd = usd_cost(gen_model, gen_in, gen_out)
 
     eval_usd = 0.0
     if cases_count and tools:
-        sample_query = "Please help me with a moderately detailed request about my data."
+        # A representative (multi-sentence) query so per-call input isn't undershot;
+        # the tool list dominates input either way and is measured exactly.
+        sample_query = (
+            "I need help with a fairly specific, multi-part request about the data "
+            "and records I have been working with — can you take care of it for me?"
+        )
         per_eval_in = await llm.count_input_tokens(
             eval_model, [{"role": "user", "content": sample_query}], tools=anthropic_tools
         )
         eval_in = per_eval_in * cases_count
-        eval_out = cases_count * 60
+        eval_out = cases_count * _EVAL_OUT_TOKENS_PER_CALL
         eval_usd = usd_cost(eval_model, eval_in, eval_out)
-    return gen_usd, eval_usd
+    return gen_usd * _ESTIMATE_SAFETY_MARGIN, eval_usd * _ESTIMATE_SAFETY_MARGIN
 
 
 async def _run(
@@ -178,7 +190,7 @@ async def _run(
     total_est = gen_usd + eval_usd
     artifact.cost.estimated_usd = round(total_est, 4)
     console.print(
-        f"\n[bold]Estimated spend[/bold]: generation ${gen_usd:.3f} + "
+        f"\n[bold]Estimated spend (upper bound)[/bold]: generation ${gen_usd:.3f} + "
         f"evaluation ${eval_usd:.3f} = [bold]${total_est:.3f}[/bold] "
         f"(~{cases_count} eval queries)."
     )

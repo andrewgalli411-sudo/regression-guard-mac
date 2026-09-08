@@ -30,7 +30,13 @@ uv run mcp-audit report ./mcp-audit-run/artifact.json
 
 # smoke-test end-to-end against the bundled example server (needs your API key)
 uv run mcp-audit run --stdio "python examples/demo_server.py" -n 5 --negatives-per-tool 3 --yes
+
+# audit a real public server (9 confusable tools) — see the committed sample output
+./examples/run-memory-audit.sh --yes
 ```
+
+A real sample audit lives in [`examples/sample-memory-server/`](examples/sample-memory-server/)
+(the official memory server, 81% selection accuracy).
 
 Outputs land in `--out` (default `./mcp-audit-run/`): `artifact.json`, `report.md`,
 `report.html`. Screenshot `report.html` into a cold email.
