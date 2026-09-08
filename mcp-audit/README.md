@@ -1,6 +1,8 @@
-# mcp-audit
+<img src="assets/reticle-mark.svg" alt="reticle" width="72" align="left">
 
-Measure how reliably an LLM picks the **right** tool from an MCP server. Connect to
+# reticle
+
+**Does the model aim at the right tool?** Measure how reliably an LLM picks the **right** tool from an MCP server. Connect to
 any MCP server (stdio or streamable HTTP), synthesize realistic user queries, ask a
 fresh model to pick a tool for each (`tool_choice=auto`, **selection only — tools are
 never executed**), and emit a one-page report: overall accuracy, per-tool hit/wrong/miss
@@ -11,7 +13,7 @@ v1 is **measurement + report only** — no description rewriting, no optimizer, 
 ## Install
 
 ```bash
-cd mcp-audit
+cd reticle
 uv sync
 export ANTHROPIC_API_KEY=sk-ant-...   # or `ant auth login`
 ```
@@ -20,16 +22,16 @@ export ANTHROPIC_API_KEY=sk-ant-...   # or `ant auth login`
 
 ```bash
 # HTTP (streamable) server
-uv run mcp-audit run --http https://their-server.example/mcp
+uv run reticle run --http https://their-server.example/mcp
 
 # stdio server
-uv run mcp-audit run --stdio "python their_server.py" -n 10 --yes
+uv run reticle run --stdio "python their_server.py" -n 10 --yes
 
 # re-render a report from a saved artifact (no model calls)
-uv run mcp-audit report ./mcp-audit-run/artifact.json
+uv run reticle report ./reticle-run/artifact.json
 
 # smoke-test end-to-end against the bundled example server (needs your API key)
-uv run mcp-audit run --stdio "python examples/demo_server.py" -n 5 --negatives-per-tool 3 --yes
+uv run reticle run --stdio "python examples/demo_server.py" -n 5 --negatives-per-tool 3 --yes
 
 # audit a real public server (9 confusable tools) — see the committed sample output
 ./examples/run-memory-audit.sh --yes
@@ -38,7 +40,7 @@ uv run mcp-audit run --stdio "python examples/demo_server.py" -n 5 --negatives-p
 A real sample audit lives in [`examples/sample-memory-server/`](examples/sample-memory-server/)
 (the official memory server, 81% selection accuracy).
 
-Outputs land in `--out` (default `./mcp-audit-run/`): `artifact.json`, `report.md`,
+Outputs land in `--out` (default `./reticle-run/`): `artifact.json`, `report.md`,
 `report.html`. Screenshot `report.html` into a cold email.
 
 ### Key flags

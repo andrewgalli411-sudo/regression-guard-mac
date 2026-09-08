@@ -6,12 +6,12 @@ from __future__ import annotations
 
 import pytest
 
-from mcp_audit.artifact import evaluated_case_ids, load_artifact, save_artifact
-from mcp_audit.connect import discover_from_target
-from mcp_audit.evaluate import run_evaluation
-from mcp_audit.generate import generate_test_cases
-from mcp_audit.models import Config, RunArtifact, Target, ToolSet
-from mcp_audit.score import compute_scores
+from reticle.artifact import evaluated_case_ids, load_artifact, save_artifact
+from reticle.connect import discover_from_target
+from reticle.evaluate import run_evaluation
+from reticle.generate import generate_test_cases
+from reticle.models import Config, RunArtifact, Target, ToolSet
+from reticle.score import compute_scores
 
 from conftest import FakeLLM
 
@@ -26,7 +26,7 @@ async def test_discovery_inprocess(fake_server):
 
 async def test_generate_test_cases():
     llm = FakeLLM(gen_queries=["make a new one", "add another"])
-    from mcp_audit.models import ToolRecord
+    from reticle.models import ToolRecord
 
     tools = [ToolRecord(name="create_record", description="Create.", has_description=True)]
     cases, gin, gout = await generate_test_cases(llm, tools, "g", positives_per_tool=2, noise_ratio=0.5)
@@ -40,7 +40,7 @@ async def test_generate_test_cases():
 
 
 def _fresh_artifact(disc) -> RunArtifact:
-    from mcp_audit.artifact import tool_set_hash
+    from reticle.artifact import tool_set_hash
 
     return RunArtifact(
         run_id="run",
@@ -57,7 +57,7 @@ def _fresh_artifact(disc) -> RunArtifact:
 async def test_eval_loop_and_scoring(fake_server, tmp_path):
     disc = await discover_from_target("inproc", "fake-crm", fake_server)
     a = _fresh_artifact(disc)
-    from mcp_audit.models import TestCase
+    from reticle.models import TestCase
 
     a.test_cases = [
         TestCase(id="c1", query="create please", expected_tool="create_record", kind="positive", generated_by="g"),
@@ -123,7 +123,7 @@ async def test_negatives_mode_generate_eval_score(fake_server, tmp_path):
 async def test_resume_skips_done(fake_server, tmp_path):
     disc = await discover_from_target("inproc", "fake-crm", fake_server)
     a = _fresh_artifact(disc)
-    from mcp_audit.models import Evaluation, TestCase, Usage
+    from reticle.models import Evaluation, TestCase, Usage
 
     a.test_cases = [
         TestCase(id="c1", query="q1", expected_tool="create_record", kind="positive", generated_by="g"),

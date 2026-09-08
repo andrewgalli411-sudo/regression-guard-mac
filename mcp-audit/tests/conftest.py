@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from mcp.server.mcpserver import MCPServer
 
-from mcp_audit.llm import CallResult
+from reticle.llm import CallResult
 
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 """A tiny stdio MCP server with deliberately confusable tools, for smoke-testing
-mcp-audit end-to-end:
+reticle end-to-end:
 
-    uv run mcp-audit run --stdio "python examples/demo_server.py" -n 5 --yes
+    uv run reticle run --stdio "python examples/demo_server.py" -n 5 --yes
 
 create_record / update_record / delete_record are close in domain and phrasing —
 a good target for watching the confusion matrix light up.

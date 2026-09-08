@@ -1,6 +1,6 @@
 # Sample audit — `@modelcontextprotocol/server-memory`
 
-A real, unmodified run of `mcp-audit` against the official memory server (9
+A real, unmodified run of `reticle` against the official memory server (9
 knowledge-graph tools). Regenerate with [`../run-memory-audit.sh`](../run-memory-audit.sh).
 
 - **`report.html`** — the shareable one-pager (open in a browser / screenshot).

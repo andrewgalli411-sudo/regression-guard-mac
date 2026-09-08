@@ -3,10 +3,11 @@ __pycache__/
 *.pyc
 .pytest_cache/
 # run outputs / caches
-mcp-audit-run/
+reticle-run/
 smoke-run/
-.mcp-audit-cache/
+.reticle-cache/
 SCRATCHPATH/
 *-audit/
 .env
 .npm-tools/
+.mcp-audit-cache/

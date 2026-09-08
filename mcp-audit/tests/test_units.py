@@ -1,20 +1,20 @@
 from __future__ import annotations
 
-from mcp_audit.artifact import (
+from reticle.artifact import (
     evaluated_case_ids,
     load_artifact,
     save_artifact,
     tool_set_hash,
 )
-from mcp_audit.evaluate import _classify, _classify_negative
-from mcp_audit.generate import _parse_string_list
-from mcp_audit.llm import (
+from reticle.evaluate import _classify, _classify_negative
+from reticle.generate import _parse_string_list
+from reticle.llm import (
     build_anthropic_tools,
     model_supports_temperature,
     price_for,
     usd_cost,
 )
-from mcp_audit.models import (
+from reticle.models import (
     Config,
     Evaluation,
     RunArtifact,
@@ -24,8 +24,8 @@ from mcp_audit.models import (
     ToolSet,
     Usage,
 )
-from mcp_audit.report import render_html, render_markdown
-from mcp_audit.score import compute_scores
+from reticle.report import render_html, render_markdown
+from reticle.score import compute_scores
 
 
 def _tools():
@@ -120,7 +120,7 @@ def test_classify_negative():
 
 
 def test_scores_with_negatives():
-    from mcp_audit.models import Usage as _U
+    from reticle.models import Usage as _U
 
     a = _artifact_with_evals()
     # add 4 negatives aimed at update_record; 1 wrongly fires it

@@ -17,7 +17,7 @@ NEGATIVES="${NEGATIVES:-4}"
 NOISE_RATIO="${NOISE_RATIO:-0.4}"
 OUT="${OUT:-./filesystem-audit}"
 
-exec uv run mcp-audit run \
+exec uv run reticle run \
   --stdio "npx -y @modelcontextprotocol/server-filesystem $ALLOW_DIR" \
   -n "$POSITIVES" \
   --negatives-per-tool "$NEGATIVES" \

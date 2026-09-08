@@ -2,30 +2,30 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "mcp-audit: run demo server",
+      "name": "reticle: run demo server",
       "type": "debugpy",
       "request": "launch",
-      "module": "mcp_audit.cli",
+      "module": "reticle.cli",
       "args": ["run", "--stdio", "python examples/demo_server.py", "-n", "3", "--negatives-per-tool", "2", "--yes"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "envFile": "${workspaceFolder}/.env"
     },
     {
-      "name": "mcp-audit: run memory server",
+      "name": "reticle: run memory server",
       "type": "debugpy",
       "request": "launch",
-      "module": "mcp_audit.cli",
+      "module": "reticle.cli",
       "args": ["run", "--stdio", "npx -y @modelcontextprotocol/server-memory", "-n", "10", "--negatives-per-tool", "4", "--yes"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "envFile": "${workspaceFolder}/.env"
     },
     {
-      "name": "mcp-audit: re-render report from artifact",
+      "name": "reticle: re-render report from artifact",
       "type": "debugpy",
       "request": "launch",
-      "module": "mcp_audit.cli",
+      "module": "reticle.cli",
       "args": ["report", "${input:artifactPath}"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal"

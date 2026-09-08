@@ -15,7 +15,7 @@ NEGATIVES="${NEGATIVES:-4}"
 NOISE_RATIO="${NOISE_RATIO:-0.4}"
 OUT="${OUT:-./memory-audit}"
 
-exec uv run mcp-audit run \
+exec uv run reticle run \
   --stdio "npx -y @modelcontextprotocol/server-memory" \
   -n "$POSITIVES" \
   --negatives-per-tool "$NEGATIVES" \

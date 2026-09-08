@@ -17,7 +17,7 @@
     {
       "label": "audit: demo server",
       "type": "shell",
-      "command": "uv run mcp-audit run --stdio \"python examples/demo_server.py\" -n 3 --negatives-per-tool 2 --yes",
+      "command": "uv run reticle run --stdio \"python examples/demo_server.py\" -n 3 --negatives-per-tool 2 --yes",
       "problemMatcher": []
     },
     {

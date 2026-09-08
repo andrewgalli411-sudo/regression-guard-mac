@@ -1,7 +1,7 @@
-"""mcp-audit CLI.
+"""reticle CLI.
 
-    mcp-audit run  --http URL | --stdio "cmd args"   -> connect, generate, evaluate, report
-    mcp-audit report ARTIFACT.json                    -> re-render a report from an artifact
+    reticle run  --http URL | --stdio "cmd args"   -> connect, generate, evaluate, report
+    reticle report ARTIFACT.json                    -> re-render a report from an artifact
 """
 
 from __future__ import annotations
@@ -280,8 +280,8 @@ def run(
     concurrency: int = typer.Option(8, help="Max concurrent eval calls."),
     temperature: float = typer.Option(0.0, help="Eval temperature (applied only if the model supports it)."),
     max_retries: int = typer.Option(6, help="Max retries per Claude call (exponential backoff)."),
-    out_dir: str = typer.Option("./mcp-audit-run", "--out", help="Output directory."),
-    cache_dir: str = typer.Option("./.mcp-audit-cache", help="Test-case cache directory."),
+    out_dir: str = typer.Option("./reticle-run", "--out", help="Output directory."),
+    cache_dir: str = typer.Option("./.reticle-cache", help="Test-case cache directory."),
     yes: bool = typer.Option(False, "--yes", "-y", help="Skip the cost confirmation."),
     cost_threshold: float = typer.Option(2.0, help="Confirm before spending above this (USD)."),
     fresh: bool = typer.Option(False, help="Ignore an existing artifact and start over."),
