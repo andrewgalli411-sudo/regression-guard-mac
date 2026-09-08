@@ -7,3 +7,4 @@ mcp-audit-run/
 smoke-run/
 .mcp-audit-cache/
 SCRATCHPATH/
+*-audit/
