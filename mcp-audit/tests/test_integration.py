@@ -87,6 +87,39 @@ async def test_eval_loop_and_scoring(fake_server, tmp_path):
     assert evaluated_case_ids(load_artifact(p)) == {"c1", "c2", "c3", "c4"}
 
 
+async def test_negatives_mode_generate_eval_score(fake_server, tmp_path):
+    disc = await discover_from_target("inproc", "fake-crm", fake_server)
+    a = _fresh_artifact(disc)
+    llm = FakeLLM(gen_queries=["near miss one", "near miss two"])
+    cases, _, _ = await generate_test_cases(
+        llm, disc.tools, "g", positives_per_tool=1, noise_ratio=0.0,
+        negatives_per_tool=2,
+    )
+    negs = [c for c in cases if c.kind == "negative"]
+    # 3 tools x 2 negatives
+    assert len(negs) == 6
+    assert all(c.target_tool in {"create_record", "update_record", "delete_record"} for c in negs)
+    assert all(c.expected_tool is None for c in negs)
+
+    a.test_cases = cases
+    # Make every negative aimed at create_record wrongly fire it; others avoid.
+    plan = {}
+    for c in cases:
+        if c.kind == "negative":
+            plan[c.query] = "create_record" if c.target_tool == "create_record" else None
+        else:
+            plan[c.query] = c.expected_tool  # positives all hit
+    # queries collide across tools (same gen_queries text) -> disambiguate by using
+    # the last-writer plan; instead give the fake a per-target rule via marker.
+    llm2 = FakeLLM(plan=plan)
+    await run_evaluation(llm2, a, lambda: None, concurrency=4, temperature=0.0)
+    a.scores = compute_scores(a)
+    assert a.scores.total_negatives == 6
+    cr = next(pt for pt in a.scores.per_tool if pt.tool == "create_record")
+    assert cr.negatives == 2 and cr.false_trigger == 2
+    assert cr.false_trigger_rate == 1.0
+
+
 async def test_resume_skips_done(fake_server, tmp_path):
     disc = await discover_from_target("inproc", "fake-crm", fake_server)
     a = _fresh_artifact(disc)

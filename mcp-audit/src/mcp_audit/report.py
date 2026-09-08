@@ -61,6 +61,12 @@ def render_markdown(artifact: RunArtifact) -> str:
             f"Over-triggering on out-of-scope queries: {_pct(s.over_trigger_rate)} "
             f"({s.total_noise} noise queries)."
         )
+    if s.total_negatives:
+        lines.append("")
+        lines.append(
+            f"False-trigger rate on adversarial near-misses: "
+            f"{_pct(s.negative_false_trigger_rate)} ({s.total_negatives} negatives)."
+        )
     lines.append("")
     lines.append(
         f"_Eval model: `{artifact.config.eval_model}` "
@@ -69,21 +75,32 @@ def render_markdown(artifact: RunArtifact) -> str:
         f"Tool-set hash: `{artifact.tool_set.hash[:12]}`._"
     )
     lines.append("")
+    show_neg = s.total_negatives > 0
     lines.append("## Per-tool accuracy (worst first)")
     lines.append("")
-    lines.append("| Tool | Picked correctly | Wrong tool | Missed | n |")
-    lines.append("|---|---|---|---|---|")
+    if show_neg:
+        lines.append("| Tool | Picked correctly | Wrong tool | Missed | False-trigger | n |")
+        lines.append("|---|---|---|---|---|---|")
+    else:
+        lines.append("| Tool | Picked correctly | Wrong tool | Missed | n |")
+        lines.append("|---|---|---|---|---|")
     for pt in s.per_tool:
-        if pt.positives == 0:
+        if pt.positives == 0 and pt.negatives == 0:
             continue
         top_conf = ""
         if pt.confused_with:
             k, v = next(iter(pt.confused_with.items()))
-            top_conf = f" (→ `{k}` {_pct(v / pt.positives)})"
-        lines.append(
-            f"| `{pt.tool}` | {_pct(pt.hit_rate)} | {_pct(pt.wrong_tool_rate)}{top_conf} "
-            f"| {_pct(pt.miss_rate)} | {pt.positives} |"
-        )
+            top_conf = f" (→ `{k}` {_pct(v / pt.positives)})" if pt.positives else ""
+        hit = _pct(pt.hit_rate) if pt.positives else "—"
+        wrong = f"{_pct(pt.wrong_tool_rate)}{top_conf}" if pt.positives else "—"
+        miss = _pct(pt.miss_rate) if pt.positives else "—"
+        if show_neg:
+            ft = f"{_pct(pt.false_trigger_rate)} of {pt.negatives}" if pt.negatives else "—"
+            lines.append(
+                f"| `{pt.tool}` | {hit} | {wrong} | {miss} | {ft} | {pt.positives} |"
+            )
+        else:
+            lines.append(f"| `{pt.tool}` | {hit} | {wrong} | {miss} | {pt.positives} |")
     lines.append("")
 
     if s.confusion_matrix:
@@ -140,21 +157,30 @@ def render_html(artifact: RunArtifact) -> str:
     def esc(x: str) -> str:
         return html.escape(str(x))
 
+    show_neg = s.total_negatives > 0
     rows = []
     for pt in s.per_tool:
-        if pt.positives == 0:
+        if pt.positives == 0 and pt.negatives == 0:
             continue
         width = int(pt.hit_rate * 90)
         conf = ""
-        if pt.confused_with:
+        if pt.confused_with and pt.positives:
             k, v = next(iter(pt.confused_with.items()))
             conf = f" <span class='meta'>→ <code>{esc(k)}</code> {_pct(v / pt.positives)}</span>"
+        neg_cell = ""
+        if show_neg:
+            ft = (
+                f"{_pct(pt.false_trigger_rate)} <span class='meta'>of {pt.negatives}</span>"
+                if pt.negatives
+                else "—"
+            )
+            neg_cell = f"<td>{ft}</td>"
         rows.append(
             f"<tr><td><code>{esc(pt.tool)}</code></td>"
             f"<td><span class='bar-bg'><span class='bar' style='width:{width}px'></span></span>"
             f"{_pct(pt.hit_rate)}</td>"
             f"<td>{_pct(pt.wrong_tool_rate)}{conf}</td>"
-            f"<td>{_pct(pt.miss_rate)}</td><td>{pt.positives}</td></tr>"
+            f"<td>{_pct(pt.miss_rate)}</td>{neg_cell}<td>{pt.positives}</td></tr>"
         )
 
     conf_html = ""
@@ -197,6 +223,11 @@ def render_html(artifact: RunArtifact) -> str:
             f"<p class='meta'>Over-triggering on out-of-scope queries: "
             f"{_pct(s.over_trigger_rate)} of {s.total_noise} noise queries.</p>"
         )
+    if s.total_negatives:
+        over += (
+            f"<p class='meta'>False-trigger rate on adversarial near-misses: "
+            f"{_pct(s.negative_false_trigger_rate)} of {s.total_negatives} negatives.</p>"
+        )
 
     temp_note = (
         "applied" if artifact.config.eval_temperature_applied else "not supported by model"
@@ -216,7 +247,7 @@ def render_html(artifact: RunArtifact) -> str:
 (temperature {temp_note}) · Generation: <code>{esc(artifact.config.generation_model)}</code>
 · Tool-set hash <code>{esc(artifact.tool_set.hash[:12])}</code></p>
 <h2>Per-tool accuracy (worst first)</h2>
-<table><thead><tr><th>Tool</th><th>Picked correctly</th><th>Wrong tool</th><th>Missed</th><th>n</th></tr></thead>
+<table><thead><tr><th>Tool</th><th>Picked correctly</th><th>Wrong tool</th><th>Missed</th>{"<th>False-trigger</th>" if show_neg else ""}<th>n</th></tr></thead>
 <tbody>{''.join(rows)}</tbody></table>
 {conf_html}
 {fails_html}

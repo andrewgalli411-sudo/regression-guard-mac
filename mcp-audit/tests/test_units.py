@@ -6,7 +6,7 @@ from mcp_audit.artifact import (
     save_artifact,
     tool_set_hash,
 )
-from mcp_audit.evaluate import _classify
+from mcp_audit.evaluate import _classify, _classify_negative
 from mcp_audit.generate import _parse_string_list
 from mcp_audit.llm import (
     build_anthropic_tools,
@@ -91,6 +91,43 @@ def test_classify():
     assert _classify("t", None) == (False, "miss")
     assert _classify(None, None) == (True, "correct_reject")
     assert _classify(None, "t") == (False, "false_positive")
+
+
+def test_classify_negative():
+    # fired the tool it must not -> false_trigger
+    assert _classify_negative("create_record", "create_record") == (False, "false_trigger")
+    # picked something else -> avoided (good)
+    assert _classify_negative("create_record", "update_record") == (True, "avoided")
+    # picked nothing -> avoided (good)
+    assert _classify_negative("create_record", None) == (True, "avoided")
+
+
+def test_scores_with_negatives():
+    from mcp_audit.models import Usage as _U
+
+    a = _artifact_with_evals()
+    # add 4 negatives aimed at update_record; 1 wrongly fires it
+    a.test_cases += [
+        TestCase(id=f"n{i}", query=f"nq{i}", expected_tool=None, kind="negative",
+                 generated_by="g", target_tool="update_record")
+        for i in range(4)
+    ]
+    picks = ["update_record", "create_record", None, "delete_record"]
+    for i, pk in enumerate(picks):
+        correct = pk != "update_record"
+        a.evaluations.append(
+            Evaluation(case_id=f"n{i}", picked_tool=pk, correct=correct,
+                       outcome="false_trigger" if not correct else "avoided",
+                       model="e", usage=_U())
+        )
+    s = compute_scores(a)
+    assert s.total_negatives == 4
+    assert abs(s.negative_false_trigger_rate - 0.25) < 1e-9
+    ur = next(pt for pt in s.per_tool if pt.tool == "update_record")
+    assert ur.negatives == 4 and ur.false_trigger == 1
+    assert abs(ur.false_trigger_rate - 0.25) < 1e-9
+    # positives-only accuracy is unchanged by the negatives
+    assert s.total_positives == 3
 
 
 def test_parse_string_list():

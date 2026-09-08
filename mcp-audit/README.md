@@ -27,6 +27,9 @@ uv run mcp-audit run --stdio "python their_server.py" -n 10 --yes
 
 # re-render a report from a saved artifact (no model calls)
 uv run mcp-audit report ./mcp-audit-run/artifact.json
+
+# smoke-test end-to-end against the bundled example server (needs your API key)
+uv run mcp-audit run --stdio "python examples/demo_server.py" -n 5 --negatives-per-tool 3 --yes
 ```
 
 Outputs land in `--out` (default `./mcp-audit-run/`): `artifact.json`, `report.md`,
@@ -40,6 +43,7 @@ Outputs land in `--out` (default `./mcp-audit-run/`): `artifact.json`, `report.m
 | `--gen-model` | `claude-sonnet-5` | Synthesizes test cases (separate prompt — never leaks the answer to the eval). |
 | `-n / --positives` | 10 | Positive queries per tool. |
 | `--noise-ratio` | 0.5 | Out-of-scope queries (as a fraction of positives) to measure over-triggering. |
+| `--negatives-per-tool` | 0 | Opt-in: adversarial per-tool near-misses that must *not* fire that tool. Adds a per-tool false-trigger rate (a precision axis the confusion matrix can't show). |
 | `--temperature` | 0.0 | Ignored by models that reject the param (recorded as `eval_temperature_applied: false`). |
 | `--concurrency` | 8 | Bounded concurrent eval calls. |
 | `--cost-threshold` | 2.0 | Confirm before spending above this (USD); `--yes` skips the prompt. |
@@ -48,8 +52,10 @@ Outputs land in `--out` (default `./mcp-audit-run/`): `artifact.json`, `report.m
 
 1. **Connect** — MCP Python SDK **v2** `Client` (URL → streamable HTTP; `StdioServerParameters`
    → subprocess); tools paginated via `next_cursor`.
-2. **Generate** — per-tool positive queries + a pool of out-of-scope noise. Cached on disk,
-   keyed by a hash of the tool set, so re-runs are free.
+2. **Generate** — per-tool positive queries + a pool of out-of-scope noise (and, with
+   `--negatives-per-tool`, adversarial near-misses aimed at each tool). Cached on disk,
+   keyed by the tool set **and** the generation parameters, so re-runs are free but a
+   changed `-n` / noise / negatives / model regenerates.
 3. **Evaluate** — one single-turn Claude call per query with the full tool list and
    `tool_choice=auto`. Bounded concurrency, live progress, every call retried with
    exponential backoff, and each result persisted immediately → **resumable** after a crash.

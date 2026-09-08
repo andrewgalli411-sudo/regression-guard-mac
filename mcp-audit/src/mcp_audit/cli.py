@@ -17,7 +17,12 @@ from rich.console import Console
 from . import artifact as art
 from .connect import ConnectionError_, discover
 from .evaluate import run_evaluation
-from .generate import _noise_prompt, _positive_prompt, generate_test_cases
+from .generate import (
+    _negative_prompt,
+    _noise_prompt,
+    _positive_prompt,
+    generate_test_cases,
+)
 from .llm import LLM, model_supports_temperature, usd_cost
 from .models import Config, RunArtifact, Target, ToolSet
 from .report import render_html, render_markdown
@@ -36,6 +41,7 @@ async def _estimate_cost(
     cases_count: int,
     positives_per_tool: int,
     noise_n: int,
+    negatives_per_tool: int,
     gen_model: str,
     eval_model: str,
     anthropic_tools,
@@ -53,6 +59,13 @@ async def _estimate_cost(
         )
         gen_in = sample_in * len(tools) + noise_in
         gen_out = len(tools) * positives_per_tool * 25 + noise_n * 25
+        if negatives_per_tool > 0 and len(tools) > 1:
+            neg_in = await llm.count_input_tokens(
+                gen_model,
+                [{"role": "user", "content": _negative_prompt(tools[0], tools[1:], negatives_per_tool)}],
+            )
+            gen_in += neg_in * len(tools)
+            gen_out += len(tools) * negatives_per_tool * 25
         gen_usd = usd_cost(gen_model, gen_in, gen_out)
 
     eval_usd = 0.0
@@ -68,7 +81,7 @@ async def _estimate_cost(
 
 
 async def _run(
-    http, stdio, gen_model, eval_model, positives, noise_ratio, concurrency,
+    http, stdio, gen_model, eval_model, positives, noise_ratio, negatives, concurrency,
     temperature, max_retries, out_dir, cache_dir, yes, cost_threshold, fresh,
 ):
     # 1. Connect + discover tools
@@ -126,6 +139,7 @@ async def _run(
                 eval_temperature_applied=temp_applied,
                 positives_per_tool=positives,
                 noise_ratio=noise_ratio,
+                negatives_per_tool=negatives,
                 max_concurrency=concurrency,
                 max_retries=max_retries,
             ),
@@ -138,7 +152,12 @@ async def _run(
     from .llm import build_anthropic_tools
 
     anthropic_tools, _ = build_anthropic_tools(disc.tools)
-    cached = art.load_cached_cases(Path(cache_dir), hash_)
+    # Cache key includes generation params so changing -n / noise / negatives / model
+    # regenerates rather than silently reusing a stale set.
+    cache_key = (
+        f"{hash_}_{gen_model}_p{positives}_nr{noise_ratio}_neg{negatives}".replace("/", "_")
+    )
+    cached = art.load_cached_cases(Path(cache_dir), cache_key)
     have_cached = bool(cached) or bool(artifact.test_cases)
     if not artifact.test_cases and cached:
         artifact.test_cases = cached
@@ -146,11 +165,14 @@ async def _run(
     import math
 
     noise_n = int(math.ceil(len(disc.tools) * positives * noise_ratio)) if noise_ratio > 0 else 0
-    cases_count = len(artifact.test_cases) or (len(disc.tools) * positives + noise_n)
+    neg_total = negatives * len(disc.tools) if negatives > 0 and len(disc.tools) > 1 else 0
+    cases_count = len(artifact.test_cases) or (
+        len(disc.tools) * positives + noise_n + neg_total
+    )
 
     # 4. Cost guardrail
     gen_usd, eval_usd = await _estimate_cost(
-        llm, disc.tools, cases_count, positives, noise_n, gen_model, eval_model,
+        llm, disc.tools, cases_count, positives, noise_n, negatives, gen_model, eval_model,
         anthropic_tools, have_cached,
     )
     total_est = gen_usd + eval_usd
@@ -175,7 +197,8 @@ async def _run(
         persist()
         console.print("[bold]Generating test cases…[/bold]")
         cases, gen_in, gen_out = await generate_test_cases(
-            llm, disc.tools, gen_model, positives, noise_ratio, concurrency
+            llm, disc.tools, gen_model, positives, noise_ratio, concurrency,
+            negatives_per_tool=negatives,
         )
         if not cases:
             console.print("[red]Generation produced no test cases.[/red]")
@@ -183,7 +206,7 @@ async def _run(
             persist()
             raise typer.Exit(1)
         artifact.test_cases = cases
-        art.save_cached_cases(Path(cache_dir), hash_, cases)
+        art.save_cached_cases(Path(cache_dir), cache_key, cases)
         console.print(f"Generated {len(cases)} test cases.")
 
     # 6. Evaluate
@@ -232,6 +255,10 @@ def run(
     gen_model: str = typer.Option(GEN_MODEL_DEFAULT, help="Model that synthesizes test cases."),
     positives: int = typer.Option(10, "-n", "--positives", help="Positive queries per tool."),
     noise_ratio: float = typer.Option(0.5, help="Out-of-scope noise queries as a fraction of positives."),
+    negatives: int = typer.Option(
+        0, "--negatives-per-tool",
+        help="Adversarial per-tool near-misses that must NOT trigger that tool (0 = off).",
+    ),
     concurrency: int = typer.Option(8, help="Max concurrent eval calls."),
     temperature: float = typer.Option(0.0, help="Eval temperature (applied only if the model supports it)."),
     max_retries: int = typer.Option(6, help="Max retries per Claude call (exponential backoff)."),
@@ -247,8 +274,9 @@ def run(
     try:
         asyncio.run(
             _run(
-                http, stdio, gen_model, eval_model, positives, noise_ratio, concurrency,
-                temperature, max_retries, out_dir, cache_dir, yes, cost_threshold, fresh,
+                http, stdio, gen_model, eval_model, positives, noise_ratio, negatives,
+                concurrency, temperature, max_retries, out_dir, cache_dir, yes,
+                cost_threshold, fresh,
             )
         )
     except (anthropic.AuthenticationError, TypeError) as e:

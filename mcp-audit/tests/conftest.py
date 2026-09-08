@@ -39,13 +39,17 @@ class FakeLLM:
         self.plan = plan or {}
         self.gen_queries = gen_queries or ["query one", "query two"]
         self.select_calls = 0
+        self._gen_calls = 0
 
     async def complete_text(self, model, prompt, max_tokens=2048, system=None):
         import json
 
+        # Unique per call so generated queries never collide across tools.
+        self._gen_calls += 1
+        qs = [f"{q} [{self._gen_calls}-{i}]" for i, q in enumerate(self.gen_queries)]
         return CallResult(
             picked_names=[], inputs=[], stop_reason="end_turn",
-            text=json.dumps(self.gen_queries),
+            text=json.dumps(qs),
             input_tokens=100, output_tokens=20, attempts=1,
         )
 

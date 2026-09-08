@@ -33,6 +33,13 @@ def _classify(expected: str | None, picked: str | None) -> tuple[bool, str]:
     return False, "wrong_tool"
 
 
+def _classify_negative(target: str | None, picked: str | None) -> tuple[bool, str]:
+    """A negative is correct as long as it did NOT fire the tool it targets."""
+    if picked == target:
+        return False, "false_trigger"
+    return True, "avoided"
+
+
 async def _eval_one(
     llm: LLM,
     model: str,
@@ -57,7 +64,10 @@ async def _eval_one(
     # unless the model parallel-calls; we treat the first as the pick).
     picked_sanitized = res.picked_names[0] if res.picked_names else None
     picked = name_map.get(picked_sanitized, picked_sanitized) if picked_sanitized else None
-    correct, outcome = _classify(case.expected_tool, picked)
+    if case.kind == "negative":
+        correct, outcome = _classify_negative(case.target_tool, picked)
+    else:
+        correct, outcome = _classify(case.expected_tool, picked)
     excerpt = (
         f"tool_use:{picked} input={res.inputs[0]}" if res.picked_names else res.text[:300]
     )

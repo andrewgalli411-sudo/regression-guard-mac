@@ -38,6 +38,7 @@ class Config(BaseModel):
     eval_temperature_applied: bool
     positives_per_tool: int
     noise_ratio: float
+    negatives_per_tool: int = 0
     max_concurrency: int
     max_retries: int
 
@@ -55,19 +56,26 @@ class ToolSet(BaseModel):
     tools: list[ToolRecord] = Field(default_factory=list)
 
 
-Kind = Literal["positive", "noise"]
+Kind = Literal["positive", "noise", "negative"]
 
 
 class TestCase(BaseModel):
     __test__ = False  # keep pytest from collecting this domain model as a test class
     id: str
     query: str
-    expected_tool: Optional[str] = None  # None => out-of-scope noise (expect no tool)
+    expected_tool: Optional[str] = None  # positive: the tool to pick; noise/negative: None
     kind: Kind
     generated_by: str
+    # negative only: the tool this adversarial near-miss must NOT trigger.
+    target_tool: Optional[str] = None
 
 
-Outcome = Literal["hit", "wrong_tool", "miss", "correct_reject", "false_positive"]
+# positive -> hit|wrong_tool|miss ; noise -> correct_reject|false_positive ;
+# negative -> avoided|false_trigger
+Outcome = Literal[
+    "hit", "wrong_tool", "miss", "correct_reject", "false_positive",
+    "avoided", "false_trigger",
+]
 
 
 class Usage(BaseModel):
@@ -100,13 +108,20 @@ class PerToolScore(BaseModel):
     wrong_tool_rate: float
     miss_rate: float
     confused_with: dict[str, int] = Field(default_factory=dict)
+    # explicit-negatives mode only (0 when unused): adversarial near-misses aimed
+    # at this tool, and how often the tool wrongly fired on them.
+    negatives: int = 0
+    false_trigger: int = 0
+    false_trigger_rate: float = 0.0
 
 
 class Scores(BaseModel):
     overall_accuracy: float = 0.0
     over_trigger_rate: float = 0.0
+    negative_false_trigger_rate: float = 0.0
     total_positives: int = 0
     total_noise: int = 0
+    total_negatives: int = 0
     per_tool: list[PerToolScore] = Field(default_factory=list)
     confusion_matrix: dict[str, dict[str, int]] = Field(default_factory=dict)
     worst_tools: list[str] = Field(default_factory=list)
